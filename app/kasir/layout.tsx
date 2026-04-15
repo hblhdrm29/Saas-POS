@@ -19,31 +19,34 @@ export default async function POSLayout({
   }
 
   return (
-    <div className="flex h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden">
+    <div className="flex h-screen bg-[#F8FAFC] font-sans text-slate-900 overflow-hidden" style={{ fontFamily: 'Arial, sans-serif' }}>
       {/* Mini Sidebar for POS Tools */}
-      <aside className="w-16 bg-white border-r flex flex-col items-center py-4 justify-between z-10 shadow-sm">
-        <div className="space-y-6 flex flex-col items-center">
-          <div className="flex items-center justify-center p-1 w-full shrink-0">
-            <Image src={logoBlueiy} alt="Logo" width={40} height={12} className="object-contain" />
-          </div>
-          <Link href="/kasir" className="p-3 bg-sky-50 text-sky-600 rounded-xl hover:bg-sky-100 transition-colors">
-            <Home className="w-6 h-6" />
-          </Link>
-          <button className="p-3 text-slate-400 hover:text-sky-600 hover:bg-slate-50 rounded-xl transition-colors">
-            <Settings className="w-6 h-6" />
-          </button>
+      <aside className="w-20 bg-white border-r border-slate-100 flex flex-col items-center py-6 justify-between z-10 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+        <div className="space-y-8 flex flex-col items-center w-full">
+          
+          <nav className="flex flex-col gap-4 w-full px-3">
+            <Link href="/kasir" className="group relative p-4 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center transition-all hover:bg-blue-100 active:scale-90">
+              <Home className="w-5 h-5" />
+              <span className="absolute left-0 w-1 h-6 bg-blue-600 rounded-r-full shadow-[0_0_12px_rgba(37,99,235,0.4)]"></span>
+            </Link>
+            
+            <button className="p-4 text-slate-300 hover:text-blue-600 hover:bg-slate-50 rounded-2xl transition-all active:scale-90">
+              <Settings className="w-5 h-5" />
+            </button>
+          </nav>
         </div>
 
         <form
-            action={async () => {
-              "use server";
-              await signOut();
-            }}
-          >
-            <button type="submit" className="p-3 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors">
-              <LogOut className="w-6 h-6" />
-            </button>
-          </form>
+          className="px-3 w-full"
+          action={async () => {
+            "use server";
+            await signOut();
+          }}
+        >
+          <button type="submit" className="w-full p-4 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all active:scale-90 flex items-center justify-center">
+            <LogOut className="w-5 h-5" />
+          </button>
+        </form>
       </aside>
 
       {/* Main POS Interface */}

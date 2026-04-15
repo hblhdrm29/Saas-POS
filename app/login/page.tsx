@@ -9,10 +9,10 @@ import logoBlueiy from "../assets/logo/blueiy_premium.png";
 export default function LoginPage() {
   return (
     <div className="flex min-h-screen font-sans bg-slate-50/50 text-slate-900 selection:bg-blue-100 items-center justify-center p-6">
-      
+
       {/* Centered Login Card */}
       <div className="w-full max-w-[28rem] bg-white rounded-3xl shadow-xl shadow-slate-200/40 border border-slate-100 p-8 sm:p-12 relative overflow-hidden">
-        
+
         {/* Simple Icon Back Button */}
         <Link href="/" className="absolute top-6 left-6 p-2 rounded-full text-slate-400 hover:text-[#0B47A9] hover:bg-slate-50 transition-colors z-20" title="Kembali ke Beranda">
           <ArrowLeft className="w-5 h-5" />
@@ -20,7 +20,7 @@ export default function LoginPage() {
 
         {/* Subtle decorative glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[200px] bg-gradient-to-b from-blue-50/80 to-transparent pointer-events-none -z-10"></div>
-        
+
         {/* Blue Logo Header */}
         <div className="flex justify-center mb-10">
           <Image src={logoBlueiy} alt="Blueiy Logo" width={160} height={50} className="object-contain" />
