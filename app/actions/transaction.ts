@@ -3,19 +3,25 @@
 import { z } from "zod";
 import { authAction } from "@/lib/safe-action";
 import { db } from "@/db";
-import { transactions, transactionItems, products } from "@/db/schema";
+import { transactions, transactionItems, products, shifts, stockLogs, voidLogs } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 const checkoutSchema = z.object({
   paymentMethod: z.string(),
+  promotionId: z.number().optional().nullable(),
+  shiftId: z.number().optional().nullable(),
   items: z.array(
     z.object({
       id: z.number(),
       quantity: z.number(),
       price: z.number(),
+      discountAmount: z.number().default(0),
     })
   ),
+  subtotal: z.number(),
+  discountAmount: z.number().default(0),
+  taxAmount: z.number().default(0),
   totalAmount: z.number(),
 });
 
@@ -27,6 +33,11 @@ export const processCheckout = authAction(checkoutSchema, async (data, ctx) => {
       .values({
         tenantId: ctx.tenantId,
         userId: ctx.userId,
+        promotionId: data.promotionId,
+        shiftId: data.shiftId,
+        subtotal: data.subtotal.toString(),
+        discountAmount: data.discountAmount.toString(),
+        taxAmount: data.taxAmount.toString(),
         totalAmount: data.totalAmount.toString(),
         paymentMethod: data.paymentMethod,
         status: "COMPLETED",
@@ -35,18 +46,17 @@ export const processCheckout = authAction(checkoutSchema, async (data, ctx) => {
 
     // 2. Process Line Items and Update Stock
     for (const item of data.items) {
-      // Create line item
       await tx.insert(transactionItems).values({
         tenantId: ctx.tenantId,
         transactionId: newTransaction.id,
         productId: item.id,
         quantity: item.quantity,
         unitPrice: item.price.toString(),
-        subtotal: (item.quantity * item.price).toString(),
+        discountAmount: item.discountAmount.toString(),
+        subtotal: ((item.quantity * item.price) - item.discountAmount).toString(),
       });
 
       // Update product stock (decrement)
-      // We use a where clause with tenantId for safety
       await tx
         .update(products)
         .set({
@@ -59,6 +69,27 @@ export const processCheckout = authAction(checkoutSchema, async (data, ctx) => {
             eq(products.tenantId, ctx.tenantId)
           )
         );
+
+      // Log stock movement
+      await tx.insert(stockLogs).values({
+        tenantId: ctx.tenantId,
+        productId: item.id,
+        type: "REDUCED",
+        quantity: item.quantity,
+        referenceId: `TRX-${newTransaction.id}`,
+        notes: "Sales via POS",
+        userId: ctx.userId,
+      });
+    }
+
+    // 3. Update Shift Total Sales (if cash)
+    if (data.paymentMethod === "CASH" && data.shiftId) {
+        await tx
+            .update(shifts)
+            .set({
+                totalSalesCash: sql`${shifts.totalSalesCash} + ${data.totalAmount.toString()}`
+            })
+            .where(eq(shifts.id, data.shiftId));
     }
 
     revalidatePath("/kasir");
@@ -67,4 +98,80 @@ export const processCheckout = authAction(checkoutSchema, async (data, ctx) => {
 
     return { transactionId: newTransaction.id };
   });
+});
+
+const voidSchema = z.object({
+    transactionId: z.number(),
+    reason: z.string().min(3),
+});
+
+export const voidTransaction = authAction(voidSchema, async (data, ctx) => {
+    return await db.transaction(async (tx) => {
+        const [transaction] = await tx
+            .select()
+            .from(transactions)
+            .where(
+                and(
+                    eq(transactions.id, data.transactionId),
+                    eq(transactions.tenantId, ctx.tenantId)
+                )
+            )
+            .limit(1);
+
+        if (!transaction || transaction.status === "VOID") {
+            throw new Error("Transaction not found or already voided.");
+        }
+
+        // Update status to VOID
+        await tx
+            .update(transactions)
+            .set({ status: "VOID" })
+            .where(eq(transactions.id, data.transactionId));
+
+        // Get items to restore stock
+        const items = await tx
+            .select()
+            .from(transactionItems)
+            .where(eq(transactionItems.transactionId, data.transactionId));
+
+        for (const item of items) {
+            if (item.productId) {
+                await tx
+                    .update(products)
+                    .set({ stock: sql`${products.stock} + ${item.quantity}` })
+                    .where(eq(products.id, item.productId));
+
+                // Log stock restore
+                await tx.insert(stockLogs).values({
+                    tenantId: ctx.tenantId,
+                    productId: item.productId,
+                    type: "VOID",
+                    quantity: item.quantity,
+                    referenceId: `VOID-${data.transactionId}`,
+                    notes: `System Void: ${data.reason}`,
+                    userId: ctx.userId,
+                });
+            }
+        }
+
+        // If shift was linked and was cash, deduct from shift total
+        if (transaction.paymentMethod === "CASH" && transaction.shiftId) {
+            await tx
+                .update(shifts)
+                .set({ totalSalesCash: sql`${shifts.totalSalesCash} - ${transaction.totalAmount}` })
+                .where(eq(shifts.id, transaction.shiftId));
+        }
+
+        // Create log entry
+        await tx.insert(voidLogs).values({
+            tenantId: ctx.tenantId,
+            transactionId: data.transactionId,
+            reason: data.reason,
+            userId: ctx.userId,
+        });
+
+        revalidatePath("/kasir");
+        revalidatePath("/admin/transactions");
+        return { success: true };
+    });
 });

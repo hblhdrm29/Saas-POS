@@ -8,95 +8,130 @@ import logoBlueiy from "../assets/logo/blueiy_premium.png";
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen font-sans bg-slate-50/50 text-slate-900 selection:bg-blue-100 items-center justify-center p-6">
-
-      {/* Centered Login Card */}
-      <div className="w-full max-w-[28rem] bg-white rounded-3xl shadow-xl shadow-slate-200/40 border border-slate-100 p-8 sm:p-12 relative overflow-hidden">
-
-        {/* Simple Icon Back Button */}
-        <Link href="/" className="absolute top-6 left-6 p-2 rounded-full text-slate-400 hover:text-[#0B47A9] hover:bg-slate-50 transition-colors z-20" title="Kembali ke Beranda">
-          <ArrowLeft className="w-5 h-5" />
-        </Link>
-
-        {/* Subtle decorative glow */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[200px] bg-gradient-to-b from-blue-50/80 to-transparent pointer-events-none -z-10"></div>
-
-        {/* Blue Logo Header */}
-        <div className="flex justify-center mb-10">
-          <Image src={logoBlueiy} alt="Blueiy Logo" width={160} height={50} className="object-contain" />
-        </div>
-
-        <div className="text-center mb-10">
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 mb-2 font-display">Selamat datang</h2>
-          <p className="text-slate-500 text-sm">Silakan masukkan kredensial Anda untuk mengakses terminal kasir.</p>
-        </div>
-
-        <form
-          action={async (formData) => {
-            "use server";
-            const email = formData.get("email") as string;
-            const redirectTo = email.includes("admin") ? "/admin" : "/kasir";
-
-            try {
-              await signIn("credentials", {
-                ...Object.fromEntries(formData),
-                redirectTo
-              });
-            } catch (error: any) {
-              if (error.type === "CredentialsSignin") {
-                redirect("/login?error=InvalidCredentials");
-              }
-              throw error;
-            }
-          }}
-          className="flex flex-col space-y-5"
+    <div className="flex flex-col min-h-screen bg-white text-slate-900 selection:bg-blue-100 font-jakarta">
+      {/* Top Navigation Header */}
+      <div className="w-full max-w-[1400px] mx-auto px-8 lg:px-16 py-8 flex items-center justify-between">
+        <Link 
+          href="/" 
+          className="group flex items-center gap-2 text-slate-400 hover:text-slate-900 transition-all font-medium text-sm"
         >
-          <div>
-            <label className="block text-[13px] font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Email Address</label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="admin@blueiy.com"
-              required
-              className="block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 placeholder-slate-400 transition-all focus:border-[#0B47A9] focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-900/10 text-slate-900 font-medium"
-            />
+          <div className="w-8 h-8 rounded-full border border-slate-100 flex items-center justify-center group-hover:border-slate-200 group-hover:bg-slate-50 transition-all">
+            <ArrowLeft className="w-4 h-4" />
           </div>
-
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-[13px] font-bold text-slate-700 uppercase tracking-wide">Password</label>
-              <a href="#" className="text-xs font-semibold text-[#0B47A9] hover:text-blue-800 transition-colors">Lupa sandi?</a>
-            </div>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              placeholder="••••••••"
-              required
-              className="block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 placeholder-slate-400 transition-all focus:border-[#0B47A9] focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-900/10 text-slate-900 font-medium"
-            />
-          </div>
-
-          <div className="flex items-center text-sm mt-1">
-            <label className="flex items-center gap-2 cursor-pointer group">
-              <input type="checkbox" className="rounded text-[#0B47A9] focus:ring-[#0B47A9] border-slate-300 w-4 h-4 cursor-pointer" />
-              <span className="text-slate-600 font-medium group-hover:text-slate-900 transition-colors">Ingat saya</span>
-            </label>
-          </div>
-
-          <button
-            type="submit"
-            className="mt-8 flex w-full items-center justify-center rounded-xl bg-slate-900 px-4 py-4 text-sm font-bold text-white shadow-lg shadow-slate-900/20 hover:bg-[#0B47A9] hover:shadow-blue-900/30 hover:-translate-y-0.5 active:translate-y-0 transition-all"
-          >
-            Masuk ke Dashboard
-          </button>
-        </form>
-
-        <p className="mt-10 text-center text-xs text-slate-500 font-medium">
-          Belum punya akun? <a href="#" className="font-bold text-[#0B47A9] hover:text-blue-800">Hubungi Sales Manager Anda.</a>
-        </p>
+        </Link>
+        <Image src={logoBlueiy} alt="Blueiy Logo" width={140} height={40} className="object-contain" />
       </div>
+
+      <div className="flex-1 flex items-center justify-center -mt-12">
+        <div className="flex flex-col lg:flex-row w-full max-w-[1200px] px-6 lg:px-12 py-12 gap-12 lg:gap-0 items-center justify-center lg:items-stretch">
+          
+          {/* Left Side: Branding & AI Visuals - Dynamic & Stacked */}
+          <div className="flex-1 flex flex-col items-center lg:items-end justify-center lg:pr-24">
+            <div className="w-full max-w-[460px] space-y-10 text-center lg:text-left">
+              <div className="space-y-6">
+                 <h1 className="text-2xl lg:text-4xl font-bold text-slate-900 tracking-tight leading-tight">
+                   Satu platform untuk semua kebutuhan <span className="text-[#0866FF]">toko Anda.</span>
+                 </h1>
+              </div>
+
+              {/* Stacked AI Assets */}
+              <div className="relative pt-6 hidden sm:block">
+                 <div className="relative z-10 rounded-[2.5rem] overflow-hidden shadow-[0_30px_60px_rgba(8,102,255,0.12)] border-[10px] border-white transform -rotate-2 hover:rotate-0 transition-all duration-700">
+                    <Image src="/images/login/pos_hero.png" alt="POS Modern" width={450} height={320} className="object-cover h-80" />
+                 </div>
+                 <div className="absolute -top-6 -right-6 lg:-right-10 z-20 rounded-[1.8rem] overflow-hidden shadow-2xl border-[6px] border-white transform rotate-6 translate-y-16 w-52 hidden lg:block hover:-translate-y-2 transition-all duration-500">
+                    <Image src="/images/login/pos_detail.png" alt="POS Interaction" width={220} height={160} className="object-cover h-36" />
+                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Dynamic Vertical Divider Line - Centered */}
+          <div className="hidden lg:block w-px bg-slate-100 self-stretch"></div>
+
+          {/* Right Side: Instagram-style Login Form - Balanced */}
+          <div className="flex-1 flex flex-col items-center lg:items-start justify-center lg:pl-20">
+            <div className="w-full max-w-[360px] space-y-8 flex flex-col items-center lg:items-start">
+              <h2 className="text-xl font-bold text-slate-900 tracking-tight">Log masuk Blueiy</h2>
+              
+              <form
+                action={async (formData) => {
+                  "use server";
+                  const email = formData.get("email") as string;
+                  const redirectTo = email.includes("admin") ? "/admin" : "/kasir";
+
+                  try {
+                    await signIn("credentials", {
+                      ...Object.fromEntries(formData),
+                      redirectTo
+                    });
+                  } catch (error: any) {
+                    if (error.type === "CredentialsSignin") {
+                      redirect("/login?error=InvalidCredentials");
+                    }
+                    throw error;
+                  }
+                }}
+                className="w-full flex flex-col space-y-3"
+              >
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="Email address"
+                  required
+                  className="block w-full rounded-xl border border-slate-200 bg-slate-50/20 px-4 py-3.5 placeholder-slate-400 focus:border-slate-400 focus:outline-none text-[14px] transition-all font-medium"
+                />
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  placeholder="Password"
+                  required
+                  className="block w-full rounded-xl border border-slate-200 bg-slate-50/20 px-4 py-3.5 placeholder-slate-400 focus:border-slate-400 focus:outline-none text-[14px] transition-all font-medium"
+                />
+
+                <button
+                  type="submit"
+                  className="mt-3 flex w-full items-center justify-center rounded-2xl bg-[#0095F6]/50 px-4 py-2.5 text-[14px] font-bold text-white shadow-sm hover:bg-[#0095F6] transition-all duration-300"
+                >
+                  Log masuk
+                </button>
+
+                <div className="text-center pt-4">
+                  <a href="#" className="text-[13px] font-medium text-slate-800 hover:text-black">Lupa kata sandi?</a>
+                </div>
+
+                <div className="flex flex-col space-y-4 pt-10">
+
+                  <button
+                    type="button"
+                    className="flex w-full items-center justify-center rounded-2xl border border-[#0095F6] px-4 py-3 text-[14px] font-bold text-[#0095F6] hover:bg-blue-50 transition-all"
+                  >
+                    Buat akun baru
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer Branding - Adjusted Typography */}
+      <footer className="w-full bg-slate-50/50 border-t border-slate-100 py-6">
+        <div className="max-w-[1200px] mx-auto px-6 lg:px-12 flex flex-col sm:flex-row items-center justify-between gap-6 text-slate-400 text-[12px] font-medium">
+          <div className="flex items-center gap-2">
+             <span>© 2026 Blueiy POS</span>
+             <div className="w-1 h-1 rounded-full bg-slate-200" />
+             <span>Meta POS Inc.</span>
+          </div>
+          <div className="flex gap-8">
+             <a href="#" className="hover:text-blue-600 transition-colors">Privasi</a>
+             <a href="#" className="hover:text-blue-600 transition-colors">Ketentuan</a>
+             <a href="#" className="hover:text-blue-600 transition-colors">Bantuan</a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

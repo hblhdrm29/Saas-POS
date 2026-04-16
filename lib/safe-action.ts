@@ -20,7 +20,7 @@ export function authAction<TInput, TOutput>(
       const user = session.user as any;
       const tenantId = user.tenantId;
       const role = user.role;
-      const userId = user.id;
+      const userId = user.id || user.sub;
 
       if (!tenantId) {
         return { success: false, error: "No tenant context found" };

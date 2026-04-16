@@ -1,6 +1,6 @@
 {
-  "id": "2160e401-88f9-432f-b57d-dcdde496ee76",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "7f99c70e-ffa7-4ff9-95e9-19da9baad64b",
+  "prevId": "2160e401-88f9-432f-b57d-dcdde496ee76",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -296,6 +296,12 @@
           "notNull": true,
           "default": true
         },
+        "image": {
+          "name": "image",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -476,7 +482,7 @@
           "name": "starting_cash",
           "type": "numeric(12, 2)",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "default": "'0'"
         },
         "total_sales_cash": {
