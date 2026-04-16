@@ -16,7 +16,7 @@ export default function SidebarNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
+    <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto">
       {navItems.map((item) => {
         // Dynamic check for active state
         const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
@@ -25,11 +25,10 @@ export default function SidebarNav() {
           <Link 
             key={item.href}
             href={item.href} 
-            className={`flex items-center gap-3 px-5 py-3 rounded-xl transition-all relative ${isActive ? 'bg-slate-50 text-slate-900 font-black' : 'text-slate-400 hover:text-slate-900 hover:bg-slate-50/50 font-bold'}`}
+            className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all ${isActive ? 'bg-blue-50 text-[#0066FF] font-bold' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 font-medium'}`}
           >
-            {isActive && <div className="absolute left-0 w-1 h-4 bg-slate-900 rounded-full" />}
-            <item.icon className={`w-4 h-4 ${isActive ? 'text-slate-900' : 'text-slate-300'}`} />
-            <span className="text-[12px] tracking-tight">{item.label}</span>
+            <item.icon className={`w-[18px] h-[18px] ${isActive ? 'text-[#0066FF]' : 'text-slate-400'}`} />
+            <span className="text-[13px] tracking-tight">{item.label}</span>
           </Link>
         )
       })}
