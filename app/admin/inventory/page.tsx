@@ -56,7 +56,7 @@ export default async function InventoryPage() {
             {/* Alert Panel for Low Stock */}
             {lowStockItems.length > 0 && (
                 <div className="bg-amber-50 border border-amber-100 rounded-[2rem] p-6 flex flex-col gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
-                    <div className="flex items-center gap-2 text-amber-800 font-black text-xs uppercase tracking-widest pl-2">
+                    <div className="flex items-center gap-2 text-amber-800 font-black text-xs tracking-wider pl-2">
                         <AlertTriangle className="w-4 h-4" /> Stok Menipis ({lowStockItems.length} Produk)
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -89,13 +89,13 @@ export default async function InventoryPage() {
                 </div>
                 <table className="w-full text-left">
                     <thead>
-                        <tr className="bg-slate-50/50 text-slate-500 text-[10px] font-black uppercase tracking-widest">
-                            <th className="px-8 py-4">Status & Product</th>
-                            <th className="px-8 py-4">Quantity</th>
-                            <th className="px-8 py-4">Reference</th>
-                            <th className="px-8 py-4">Admin</th>
-                            <th className="px-8 py-4">Date & Time</th>
-                            <th className="px-8 py-4 text-right">Notes</th>
+                        <tr className="bg-slate-50/50 text-slate-400 text-[10px] font-bold tracking-wider">
+                            <th className="px-6 py-4 font-medium">Status & Product</th>
+                            <th className="px-6 py-4 font-medium">Quantity</th>
+                            <th className="px-6 py-4 font-medium">Reference</th>
+                            <th className="px-6 py-4 font-medium">Admin</th>
+                            <th className="px-6 py-4 font-medium">Date & Time</th>
+                            <th className="px-8 py-4 text-right font-medium">Notes</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50">
@@ -115,15 +115,15 @@ export default async function InventoryPage() {
                                             </div>
                                             <div>
                                                 <p className="text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors">{log.productName}</p>
-                                                <p className="text-[10px] text-slate-400 font-mono tracking-tighter uppercase">{log.sku}</p>
+                                                <p className="text-[10px] text-slate-400 font-mono tracking-tighter">{log.sku}</p>
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-8 py-5">
-                                        <span className={`text-sm font-black ${
-                                            log.type === 'RECEIVED' ? 'text-emerald-600' : 
-                                            log.type === 'REDUCED' ? 'text-red-600' : 
-                                            'text-slate-800'
+                                    <td className="px-6 py-5">
+                                        <span className={`text-[13px] font-bold ${
+                                            log.type === 'RECEIVED' ? 'text-emerald-500' : 
+                                            log.type === 'REDUCED' ? 'text-red-500' : 
+                                            'text-slate-700'
                                         }`}>
                                             {log.type === 'RECEIVED' ? '+' : '-'}{Math.abs(Number(log.quantity))}
                                         </span>
@@ -131,9 +131,9 @@ export default async function InventoryPage() {
                                     <td className="px-8 py-5">
                                         <span className="text-[11px] font-bold text-slate-600 bg-slate-100 px-2 py-1 rounded-md">{log.referenceId}</span>
                                     </td>
-                                    <td className="px-8 py-5">
-                                        <div className="flex items-center gap-2 text-xs font-medium text-slate-600">
-                                            <div className="w-5 h-5 bg-slate-100 rounded-full flex items-center justify-center text-[10px] font-black text-slate-400 uppercase">
+                                    <td className="px-6 py-5">
+                                        <div className="flex items-center gap-2 text-[11px] font-medium text-slate-600">
+                                            <div className="w-5 h-5 bg-slate-100 rounded-full flex items-center justify-center text-[9px] font-bold text-slate-400">
                                                 {log.userName?.charAt(0)}
                                             </div>
                                             {log.userName}

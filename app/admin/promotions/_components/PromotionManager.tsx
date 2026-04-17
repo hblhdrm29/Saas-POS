@@ -75,7 +75,7 @@ export default function PromotionManager({ initialPromotions }: { initialPromoti
                 </div>
                 <table className="w-full text-left">
                     <thead>
-                        <tr className="bg-slate-50/50 text-slate-500 text-[10px] font-black uppercase tracking-widest">
+                        <tr className="bg-slate-50/50 text-slate-500 text-[10px] font-black tracking-wider">
                             <th className="px-8 py-4">Promo Code</th>
                             <th className="px-8 py-4">Type</th>
                             <th className="px-8 py-4">Value</th>
@@ -99,11 +99,11 @@ export default function PromotionManager({ initialPromotions }: { initialPromoti
                                             <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
                                                 <Ticket className="w-5 h-5 text-blue-600" />
                                             </div>
-                                            <span className="font-bold text-slate-800 uppercase tracking-wider">{promo.code}</span>
+                                            <span className="font-bold text-slate-800 tracking-wider">{promo.code}</span>
                                         </div>
                                     </td>
                                     <td className="px-8 py-5">
-                                        <span className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase ${promo.type === 'PERCENTAGE' ? 'bg-purple-50 text-purple-600' : 'bg-amber-50 text-amber-600'}`}>
+                                        <span className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest ${promo.type === 'PERCENTAGE' ? 'bg-purple-50 text-purple-600' : 'bg-amber-50 text-amber-600'}`}>
                                             {promo.type === 'PERCENTAGE' ? (
                                                 <span className="flex items-center gap-1"><Percent className="w-3 h-3" /> Percentage</span>
                                             ) : (

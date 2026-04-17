@@ -12,6 +12,7 @@ export default async function ShiftsPage() {
         .select({
             id: shifts.id,
             userName: users.name,
+            userRole: users.role,
             startTime: shifts.startTime,
             endTime: shifts.endTime,
             startingCash: shifts.startingCash,
@@ -41,8 +42,9 @@ export default async function ShiftsPage() {
             <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
                 <table className="w-full text-left border-collapse">
                     <thead>
-                        <tr className="bg-slate-50/50 text-slate-500 text-[10px] font-black uppercase tracking-widest border-b border-slate-100">
+                        <tr className="bg-slate-50/50 text-slate-500 text-[10px] font-black tracking-wider border-b border-slate-100">
                             <th className="px-8 py-5">Cashier</th>
+                            <th className="px-8 py-5">Position</th>
                             <th className="px-8 py-5">Shift Time</th>
                             <th className="px-8 py-5">Expected Cash</th>
                             <th className="px-8 py-5">Actual Cash</th>
@@ -72,6 +74,11 @@ export default async function ShiftsPage() {
                                             </div>
                                         </td>
                                         <td className="px-8 py-6">
+                                            <span className={`text-[10px] font-black tracking-wider px-2 py-1 rounded-md ${shift.userRole === 'ADMIN' ? 'bg-blue-50 text-blue-600' : 'bg-slate-50 text-slate-500'}`}>
+                                                {shift.userRole === 'ADMIN' ? 'Admin' : 'Kasir'}
+                                            </span>
+                                        </td>
+                                        <td className="px-8 py-6">
                                             <div className="flex flex-col gap-1">
                                                 <div className="flex items-center gap-2 text-xs font-bold text-slate-700">
                                                     <Clock className="w-3 h-3 text-slate-300" />
@@ -90,7 +97,7 @@ export default async function ShiftsPage() {
                                             {shift.status === 'CLOSED' ? (
                                                 <span className="text-xs font-black text-slate-800">{formatCurrency(actualTotal)}</span>
                                             ) : (
-                                                <span className="text-[10px] font-black tracking-widest text-blue-500 uppercase px-2 py-1 bg-blue-50 rounded">In Progress</span>
+                                                <span className="text-[10px] font-black tracking-widest text-blue-500 px-2 py-1 bg-blue-50 rounded">In Progress</span>
                                             )}
                                         </td>
                                         <td className="px-8 py-6 text-sm font-black">
@@ -108,7 +115,7 @@ export default async function ShiftsPage() {
                                             )}
                                         </td>
                                         <td className="px-8 py-6">
-                                            <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${shift.status === 'OPEN' ? 'bg-blue-50 text-blue-600' : 'bg-slate-100 text-slate-500'}`}>
+                                            <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black tracking-widest ${shift.status === 'OPEN' ? 'bg-blue-50 text-blue-600' : 'bg-slate-100 text-slate-500'}`}>
                                                 {shift.status}
                                             </span>
                                         </td>

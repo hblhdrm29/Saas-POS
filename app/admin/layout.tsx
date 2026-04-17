@@ -48,15 +48,7 @@ export default async function AdminLayout({
         </div>
 
         <div className="p-6 border-t border-slate-100">
-           <Link href="/kasir" className="flex items-center justify-center gap-2 w-full bg-[#0066FF] text-white py-2.5 rounded-lg font-bold text-[12px] hover:bg-blue-700 transition-all mb-4 shadow-sm">
-              <Plus className="w-4 h-4" />
-              <span>New Transaction</span>
-           </Link>
-
            <div className="space-y-0.5">
-              <Link href="/admin/support" className="flex items-center gap-3 px-3 py-2 text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-md transition-all group">
-                 <span className="text-[12px] font-semibold">Help & Support</span>
-              </Link>
               <form
                  action={async () => {
                    "use server";
@@ -64,6 +56,7 @@ export default async function AdminLayout({
                  }}
                >
                  <button type="submit" className="flex w-full items-center gap-3 px-3 py-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-all group">
+                   <LogOut className="w-4 h-4 text-slate-400 group-hover:text-red-500" />
                    <span className="text-[12px] font-semibold">Logout Account</span>
                  </button>
                </form>
@@ -84,11 +77,6 @@ export default async function AdminLayout({
           </div>
           
           <div className="flex items-center gap-6">
-            <div className="flex items-center gap-3 pr-4 border-r border-slate-100">
-               <button className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all text-sm">🔔</button>
-               <button className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all text-sm">⚙️</button>
-            </div>
-            
             <div className="flex items-center gap-3">
                <div className="text-right hidden sm:block">
                   <p className="text-[13px] font-bold text-slate-900 leading-none">{session.user.name}</p>

@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
-import { Download, Calendar, CreditCard, ShoppingCart, TrendingUp, AlertTriangle, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { Download, Calendar, CreditCard, ShoppingCart, TrendingUp, AlertTriangle, PlusCircle } from "lucide-react";
+import Link from "next/link";
 import SalesBarChart from "./_components/SalesBarChart";
 import RecentSales from "./_components/RecentSales";
 import { getDashboardStats, getWeeklySalesData, getRecentSales, getLowStockAlerts } from "@/app/actions/dashboard";
@@ -34,10 +35,14 @@ export default async function AdminDashboard() {
                   <Calendar className="w-4 h-4" />
                   <span>30 Days</span>
                </button>
-               <button className="flex items-center gap-2 px-4 py-2 bg-[#0066FF] rounded-lg text-[13px] font-semibold text-white hover:bg-blue-700 transition-all shadow-sm">
+               <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-[13px] font-semibold text-slate-600 hover:bg-slate-50 transition-all">
                   <Download className="w-4 h-4" />
                   <span>Export</span>
                </button>
+               <Link href="/kasir" className="flex items-center gap-2 px-4 py-2 bg-[#0066FF] rounded-lg text-[13px] font-semibold text-white hover:bg-blue-700 transition-all shadow-sm">
+                  <PlusCircle className="w-4 h-4" />
+                  <span>New Transaction</span>
+               </Link>
             </div>
          </div>
 

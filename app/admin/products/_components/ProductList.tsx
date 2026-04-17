@@ -78,7 +78,7 @@ export default function ProductList({ initialProducts, categories }: ProductList
           </div>
           <button
             onClick={() => { setEditingProduct(null); setShowForm(true); }}
-            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-10 py-4 bg-[#0066FF] text-white rounded-[1.5rem] text-[14px] font-black shadow-xl shadow-blue-500/20 hover:bg-blue-600 transition-all active:scale-95 uppercase tracking-widest"
+            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-10 py-4 bg-[#0066FF] text-white rounded-[1.5rem] text-[14px] font-black shadow-xl shadow-blue-500/20 hover:bg-blue-600 transition-all active:scale-95 tracking-wide"
           >
             <Plus className="w-4 h-4" />
             <span>Add Product</span>
@@ -92,12 +92,12 @@ export default function ProductList({ initialProducts, categories }: ProductList
           <table className="w-full text-left border-separate border-spacing-0">
             <thead>
               <tr className="bg-[#EBF5FF]">
-                <th className="px-10 py-7 text-[11px] font-black text-slate-600 uppercase tracking-[0.2em] border-b border-blue-100 rounded-tl-[2.5rem]">No</th>
-                <th className="px-6 py-7 text-[11px] font-black text-slate-600 uppercase tracking-[0.2em] border-b border-blue-100">Product Info</th>
-                <th className="px-6 py-7 text-[11px] font-black text-slate-600 uppercase tracking-[0.2em] border-b border-blue-100">Category</th>
-                <th className="px-6 py-7 text-[11px] font-black text-slate-600 uppercase tracking-[0.2em] border-b border-blue-100 text-center">Price</th>
-                <th className="px-6 py-7 text-[11px] font-black text-slate-600 uppercase tracking-[0.2em] border-b border-blue-100 text-center">Stock</th>
-                <th className="px-10 py-7 text-[11px] font-black text-slate-600 uppercase tracking-[0.2em] border-b border-blue-100 text-right rounded-tr-[2.5rem]">Action</th>
+                <th className="px-6 py-5 text-[10px] font-bold text-slate-500 tracking-wider border-b border-blue-50 rounded-tl-3xl">No</th>
+                <th className="px-6 py-5 text-[10px] font-bold text-slate-500 tracking-wider border-b border-blue-50">Product Name</th>
+                <th className="px-6 py-5 text-[10px] font-bold text-slate-500 tracking-wider border-b border-blue-50">Category</th>
+                <th className="px-6 py-5 text-[10px] font-bold text-slate-500 tracking-wider border-b border-blue-50 text-center">Price</th>
+                <th className="px-6 py-5 text-[10px] font-bold text-slate-500 tracking-wider border-b border-blue-50 text-center">Stock</th>
+                <th className="px-8 py-5 text-[10px] font-bold text-slate-500 tracking-wider border-b border-blue-50 text-right rounded-tr-3xl">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
@@ -120,26 +120,26 @@ export default function ProductList({ initialProducts, categories }: ProductList
                         )}
                       </div>
                       <div>
-                        <p className="text-[15px] font-black text-slate-900 leading-tight mb-1 group-hover:text-[#0066FF] transition-colors">{product.name}</p>
-                        <span className="text-[10px] font-black text-slate-400 font-mono tracking-widest bg-slate-100 px-2 py-0.5 rounded-lg">{product.sku}</span>
+                        <p className="text-[14px] font-semibold text-slate-800 leading-tight mb-0.5 group-hover:text-[#0066FF] transition-colors">{product.name}</p>
+                        <span className="text-[9px] font-bold text-slate-400 font-mono tracking-wider bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">{product.sku}</span>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-6">
-                    <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100">
+                  <td className="px-6 py-6 font-medium">
+                    <span className="text-[11px] font-semibold text-slate-500 tracking-tight bg-slate-50/50 px-2.5 py-1 rounded-lg border border-slate-100">
                       {product.categoryId ? categories.find(c => c.id === product.categoryId)?.name : "General"}
                     </span>
                   </td>
-                  <td className="px-6 py-6 text-[15px] font-black text-slate-900 text-center tabular-nums italic">
+                  <td className="px-6 py-6 text-[14px] font-semibold text-slate-800 text-center tabular-nums italic">
                     {formatCurrency(product.price)}
                   </td>
                   <td className="px-6 py-6 text-center">
-                    <div className="flex flex-col items-center gap-1">
-                       <span className={`text-[14px] font-black tabular-nums ${product.stock <= product.lowStockThreshold ? 'text-red-500' : 'text-slate-700'}`}>
+                    <div className="flex flex-col items-center gap-0.5">
+                       <span className={`text-[12px] font-bold tabular-nums ${product.stock <= product.lowStockThreshold ? 'text-red-500' : 'text-slate-600'}`}>
                          {product.stock}
                        </span>
                        {product.stock <= product.lowStockThreshold && (
-                         <span className="text-[9px] font-black text-red-500 uppercase tracking-tighter animate-pulse">Low Stock</span>
+                         <span className="text-[8px] font-bold text-red-400 tracking-tighter animate-pulse">Low Stock</span>
                        )}
                     </div>
                   </td>
