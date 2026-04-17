@@ -3,8 +3,8 @@
 import { z } from "zod";
 import { authAction } from "@/lib/safe-action";
 import { db } from "@/db";
-import { transactions, transactionItems, products, shifts, stockLogs, voidLogs } from "@/db/schema";
-import { eq, and, sql } from "drizzle-orm";
+import { transactions, transactionItems, products, shifts, stockLogs, voidLogs, users } from "@/db/schema";
+import { eq, and, sql, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 const checkoutSchema = z.object({
@@ -175,3 +175,71 @@ export const voidTransaction = authAction(voidSchema, async (data, ctx) => {
         return { success: true };
     });
 });
+
+/**
+ * Fetch all transactions for the admin list
+ */
+export const getTransactions = authAction(
+    z.object({
+        paymentMethod: z.string().optional(),
+        search: z.string().optional(),
+    }),
+    async (data, ctx) => {
+        const query = db
+            .select({
+                id: transactions.id,
+                totalAmount: transactions.totalAmount,
+                paymentMethod: transactions.paymentMethod,
+                status: transactions.status,
+                createdAt: transactions.createdAt,
+                staffName: users.name,
+            })
+            .from(transactions)
+            .leftJoin(users, eq(transactions.userId, users.id))
+            .where(
+                and(
+                    eq(transactions.tenantId, ctx.tenantId),
+                    data.paymentMethod && data.paymentMethod !== "ALL" 
+                        ? eq(transactions.paymentMethod, data.paymentMethod) 
+                        : undefined,
+                    data.search 
+                        ? sql`${transactions.id}::text ILIKE ${`%${data.search}%`}` 
+                        : undefined
+                )
+            )
+            .orderBy(desc(transactions.createdAt));
+
+        const results = await query;
+        return results;
+    }
+);
+
+/**
+ * Fetch details for a specific transaction
+ */
+export const getTransactionItems = authAction(
+    z.object({
+        transactionId: z.number(),
+    }),
+    async (data, ctx) => {
+        const items = await db
+            .select({
+                id: transactionItems.id,
+                quantity: transactionItems.quantity,
+                unitPrice: transactionItems.unitPrice,
+                subtotal: transactionItems.subtotal,
+                productName: products.name,
+                productSku: products.sku,
+            })
+            .from(transactionItems)
+            .leftJoin(products, eq(transactionItems.productId, products.id))
+            .where(
+                and(
+                    eq(transactionItems.transactionId, data.transactionId),
+                    eq(transactionItems.tenantId, ctx.tenantId)
+                )
+            );
+
+        return items;
+    }
+);

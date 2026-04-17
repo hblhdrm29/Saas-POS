@@ -58,7 +58,21 @@ export default function LoginPage() {
                 action={async (formData) => {
                   "use server";
                   const email = formData.get("email") as string;
-                  const redirectTo = email.includes("admin") ? "/admin" : "/kasir";
+                  
+                  // Check user role from DB to determine redirect correctly
+                  let redirectTo = "/kasir";
+                  try {
+                    const { db } = await import("@/db");
+                    const { users } = await import("@/db/schema");
+                    const { eq } = await import("drizzle-orm");
+                    
+                    const userRecords = await db.select().from(users).where(eq(users.email, email));
+                    if (userRecords[0]?.role === "ADMIN") {
+                      redirectTo = "/admin";
+                    }
+                  } catch (e) {
+                    console.error("Redirect check failed", e);
+                  }
 
                   try {
                     await signIn("credentials", {

@@ -22,11 +22,11 @@ export default function SidebarNav() {
       {navItems.map((item) => {
         // Dynamic check for active state
         const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
-        
+
         return (
-          <Link 
+          <Link
             key={item.href}
-            href={item.href} 
+            href={item.href}
             className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all ${isActive ? 'bg-blue-50 text-[#0066FF] font-bold' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 font-medium'}`}
           >
             <item.icon className={`w-[18px] h-[18px] ${isActive ? 'text-[#0066FF]' : 'text-slate-400'}`} />

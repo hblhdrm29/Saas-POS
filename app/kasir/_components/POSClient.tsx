@@ -723,7 +723,12 @@ export default function POSClient({
               <div className="text-center space-y-2 mb-8">
                 <h3 className="text-2xl font-bold text-slate-900">Transaksi Berhasil</h3>
                 <p className="text-slate-500 text-sm">Pesanan telah tercatat dan stok telah diperbarui.</p>
-                <p className="text-xs font-mono text-slate-400 bg-slate-50 px-3 py-1 rounded-md inline-block">Order #{lastTransactionId}</p>
+                <div className="flex flex-col items-center gap-1.5 mt-2">
+                  <p className="text-xs font-mono text-slate-400 bg-slate-50 px-3 py-1 rounded-md inline-block">Order #{lastTransactionId}</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    {new Date().toLocaleString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                </div>
               </div>
 
               <div className="w-full space-y-3 mb-8 px-2">

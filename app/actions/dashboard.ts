@@ -70,7 +70,7 @@ export async function getWeeklySalesData() {
   
   // Create a map for easy lookup
   const salesMap = results.reduce((acc: any, curr) => {
-    acc[curr.day.toUpperCase()] = parseFloat(curr.sales || "0");
+    acc[curr.day.trim().toUpperCase()] = parseFloat(curr.sales || "0");
     return acc;
   }, {});
 

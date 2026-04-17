@@ -109,6 +109,12 @@ export default async function AdminDashboard() {
             <div className="lg:col-span-2 bg-white p-8 rounded-xl border border-slate-200 shadow-sm">
                <div className="flex justify-between items-center mb-8">
                   <h3 className="font-bold text-slate-900 text-sm">Weekly Sales Performance</h3>
+                  <div className="flex items-center gap-1.5 px-2 py-1 bg-slate-50/50 rounded-lg border border-slate-100">
+                     <Calendar className="w-3 h-3 text-slate-400" />
+                     <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">
+                        {new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })} - {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                     </span>
+                  </div>
                </div>
                <SalesBarChart data={weeklySales} />
             </div>

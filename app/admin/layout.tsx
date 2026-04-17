@@ -31,16 +31,10 @@ export default async function AdminLayout({
     <div className="flex h-screen bg-[#F8FAFC] font-jakarta text-slate-900 overflow-hidden">
       {/* Professional Sidebar */}
       <aside className="w-[240px] bg-white border-r border-slate-200 flex flex-col relative z-20">
-        <div className="p-6">
-          <div className="flex items-center gap-3">
-             <div className="w-8 h-8 bg-[#0066FF] rounded-lg flex items-center justify-center text-white">
-                <Image src={logoBlueiy} alt="Blueiy Logo" width={18} height={18} className="brightness-0 invert object-contain" />
-             </div>
-             <div>
-                <h2 className="text-[14px] font-bold text-slate-900 leading-none mb-0.5 tracking-tight">Blueiy POS</h2>
-                <p className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Administration</p>
-             </div>
-          </div>
+        <div className="p-6 flex flex-col items-center justify-center">
+           <Link href="/admin" className="hover:scale-[1.02] transition-transform duration-300 flex justify-center">
+              <Image src={logoBlueiy} alt="Blueiy Logo" width={100} height={30} className="object-contain" priority />
+           </Link>
         </div>
 
         <div className="flex-1 px-3 space-y-1 overflow-y-auto">
