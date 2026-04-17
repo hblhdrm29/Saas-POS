@@ -253,6 +253,8 @@ export default function POSClient({
     if (cart.length === 0 || isProcessing || !activeShift) return;
 
     setIsProcessing(true);
+    const cleanAmountReceived = Number(amountReceived.toString().replace(/\./g, ""));
+    
     try {
       const result = await processCheckout({
         paymentMethod,
@@ -277,6 +279,8 @@ export default function POSClient({
         setCart([]);
         setAppliedPromo(null);
         setPromoCode("");
+        setAmountReceived("");
+        setCheckoutStep('cart');
       } else {
         alert("Error: " + result.error);
       }
@@ -293,7 +297,7 @@ export default function POSClient({
   };
 
   const changeAmount = useMemo(() => {
-    const received = Number(amountReceived) || 0;
+    const received = Number(amountReceived.toString().replace(/\./g, "")) || 0;
     return Math.max(0, received - totalAmount);
   }, [amountReceived, totalAmount]);
 
@@ -317,7 +321,7 @@ export default function POSClient({
                 placeholder="Find products by name or SKU..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-blue-50 focus:border-blue-600 transition-all outline-none text-sm font-medium"
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-blue-50 focus:border-blue-600 transition-all outline-none text-[13px] font-medium"
               />
             </div>
           </div>
@@ -376,24 +380,22 @@ export default function POSClient({
                   Stock: {product.stock}
                 </div>
 
-                <div className="flex-1 flex items-center justify-center mb-4 relative overflow-hidden rounded-2xl bg-slate-50 group-hover:bg-blue-50 transition-colors">
-                  {/* Image with Icon Fallback logic */}
-                  <img 
-                    src={product.image || `/products/${product.id}.jpg`} 
-                    alt={product.name}
-                    className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-300"
-                    onLoad={(e) => (e.currentTarget.style.opacity = '1')}
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                  <ShoppingCart className="w-8 h-8 text-slate-200 opacity-20 group-hover:text-blue-400 group-hover:opacity-40 transition-all" />
+                <div className="flex-1 flex items-center justify-center mb-4 relative overflow-hidden rounded-2xl bg-slate-50 border border-slate-100/50 group-hover:bg-blue-50 transition-colors">
+                  {product.image ? (
+                    <img 
+                      src={product.image} 
+                      alt={product.name}
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  ) : (
+                    <ShoppingCart className="w-8 h-8 text-slate-200 opacity-20 group-hover:text-blue-400 group-hover:opacity-40 transition-all" />
+                  )}
                 </div>
 
                 <div>
-                  <h3 className="text-sm font-bold text-slate-800 line-clamp-2 leading-tight mb-2 group-hover:text-blue-700 transition-colors">{product.name}</h3>
+                  <h3 className="text-[13px] font-semibold text-slate-800 line-clamp-2 leading-tight mb-2 group-hover:text-blue-700 transition-colors">{product.name}</h3>
                   <div className="flex items-center">
-                    <p className="text-blue-600 font-bold text-sm">{formatCurrency(product.price)}</p>
+                    <p className="text-blue-600 font-bold text-[13px]">{formatCurrency(product.price)}</p>
                   </div>
                 </div>
               </div>
@@ -426,7 +428,7 @@ export default function POSClient({
               </div>
             )}
             <div>
-              <h2 className="text-sm font-bold text-slate-900 leading-none mb-1">
+              <h2 className="text-[13px] font-bold text-slate-900 leading-none mb-1">
                 {checkoutStep === 'cart' ? 'Daftar Pesanan' : 'Pembayaran'}
               </h2>
               <p className="text-[10px] font-bold text-slate-400">
@@ -519,7 +521,7 @@ export default function POSClient({
                   <div className="flex flex-col">
                     <span className="text-[10px] font-bold text-slate-400 mb-1">Total Belanja</span>
                     <div className="flex items-baseline gap-1">
-                      <span className="text-xs font-bold text-slate-400">Rp</span>
+                      <span className="text-[11px] font-bold text-slate-400">Rp</span>
                       <span className="text-2xl font-black text-slate-900 tracking-tight leading-none tabular-nums">{totalAmount.toLocaleString('id-ID')}</span>
                     </div>
                   </div>
@@ -600,9 +602,14 @@ export default function POSClient({
                       <div className="flex items-center gap-3 px-4 py-3">
                         <span className="text-lg font-bold text-slate-200">Rp</span>
                         <input
-                          type="number"
+                          type="text"
                           value={amountReceived}
-                          onChange={(e) => setAmountReceived(e.target.value)}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, "");
+                            const cleanValue = value === "" ? "" : parseInt(value).toString();
+                            const formatted = cleanValue.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                            setAmountReceived(formatted);
+                          }}
                           placeholder="0..."
                           className="w-full text-xl font-black text-slate-900 placeholder:text-slate-100 outline-none tabular-nums"
                           autoFocus
@@ -616,7 +623,7 @@ export default function POSClient({
                     {quickPayAmounts.map(amount => (
                       <button
                         key={amount}
-                        onClick={() => setAmountReceived(amount.toString())}
+                        onClick={() => setAmountReceived(amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."))}
                         className="py-2.5 px-3 bg-white border border-slate-100 text-[10px] font-bold text-slate-500 rounded-xl hover:bg-slate-50 hover:border-blue-200 transition-all text-left flex justify-between items-center group shadow-sm"
                       >
                         <span>{formatCurrency(amount).replace('Rp ', '')}</span>
@@ -688,18 +695,14 @@ export default function POSClient({
             {/* Final Confirmation Button - Compact */}
             <div className="p-5 bg-white border-t border-slate-50">
               <button
-                onClick={() => {
-                  handleCheckout();
-                  setCheckoutStep('cart');
-                  setAmountReceived("");
-                }}
-                disabled={isProcessing || (paymentMethod === 'CASH' && (Number(amountReceived) < totalAmount))}
+                onClick={handleCheckout}
+                disabled={isProcessing || (paymentMethod === 'CASH' && (Number(amountReceived.toString().replace(/\./g, "")) < totalAmount))}
                 className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs transition-all active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-blue-500/10"
               >
                 <CheckCircle2 className="w-4 h-4" />
                 <span>Selesaikan Pembayaran</span>
               </button>
-              {paymentMethod === 'CASH' && Number(amountReceived) < totalAmount && Number(amountReceived) > 0 && (
+              {paymentMethod === 'CASH' && Number(amountReceived.toString().replace(/\./g, "")) < totalAmount && Number(amountReceived.toString().replace(/\./g, "")) > 0 && (
                 <div className="flex items-center justify-center gap-1.5 mt-3 text-red-500">
                   <div className="w-1 h-1 bg-red-500 rounded-full animate-ping" />
                   <p className="text-[9px] font-bold">Nominal belum mencukupi</p>

@@ -1,8 +1,7 @@
-import { signIn } from "@/auth";
-import { redirect } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import LoginForm from "./_components/LoginForm";
 
 import logoBlueiy from "../assets/logo/blueiy_premium.png";
 
@@ -25,7 +24,7 @@ export default function LoginPage() {
       <div className="flex-1 flex items-center justify-center -mt-12">
         <div className="flex flex-col lg:flex-row w-full max-w-[1200px] px-6 lg:px-12 py-12 gap-12 lg:gap-0 items-center justify-center lg:items-stretch">
           
-          {/* Left Side: Branding & AI Visuals - Dynamic & Stacked */}
+          {/* Left Side: Branding & AI Visuals */}
           <div className="flex-1 flex flex-col items-center lg:items-end justify-center lg:pr-24">
             <div className="w-full max-w-[460px] space-y-10 text-center lg:text-left">
               <div className="space-y-6">
@@ -46,92 +45,20 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Dynamic Vertical Divider Line - Centered */}
           <div className="hidden lg:block w-px bg-slate-100 self-stretch"></div>
 
-          {/* Right Side: Instagram-style Login Form - Balanced */}
+          {/* Right Side: Login Form */}
           <div className="flex-1 flex flex-col items-center lg:items-start justify-center lg:pl-20">
             <div className="w-full max-w-[360px] space-y-8 flex flex-col items-center lg:items-start">
               <h2 className="text-xl font-bold text-slate-900 tracking-tight">Log masuk Blueiy</h2>
               
-              <form
-                action={async (formData) => {
-                  "use server";
-                  const email = formData.get("email") as string;
-                  
-                  // Check user role from DB to determine redirect correctly
-                  let redirectTo = "/kasir";
-                  try {
-                    const { db } = await import("@/db");
-                    const { users } = await import("@/db/schema");
-                    const { eq } = await import("drizzle-orm");
-                    
-                    const userRecords = await db.select().from(users).where(eq(users.email, email));
-                    if (userRecords[0]?.role === "ADMIN") {
-                      redirectTo = "/admin";
-                    }
-                  } catch (e) {
-                    console.error("Redirect check failed", e);
-                  }
-
-                  try {
-                    await signIn("credentials", {
-                      ...Object.fromEntries(formData),
-                      redirectTo
-                    });
-                  } catch (error: any) {
-                    if (error.type === "CredentialsSignin") {
-                      redirect("/login?error=InvalidCredentials");
-                    }
-                    throw error;
-                  }
-                }}
-                className="w-full flex flex-col space-y-3"
-              >
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="Email address"
-                  required
-                  className="block w-full rounded-xl border border-slate-200 bg-slate-50/20 px-4 py-3.5 placeholder-slate-400 focus:border-slate-400 focus:outline-none text-[14px] transition-all font-medium"
-                />
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  placeholder="Password"
-                  required
-                  className="block w-full rounded-xl border border-slate-200 bg-slate-50/20 px-4 py-3.5 placeholder-slate-400 focus:border-slate-400 focus:outline-none text-[14px] transition-all font-medium"
-                />
-
-                <button
-                  type="submit"
-                  className="mt-3 flex w-full items-center justify-center rounded-2xl bg-[#0095F6]/50 px-4 py-2.5 text-[14px] font-bold text-white shadow-sm hover:bg-[#0095F6] transition-all duration-300"
-                >
-                  Log masuk
-                </button>
-
-                <div className="text-center pt-4">
-                  <a href="#" className="text-[13px] font-medium text-slate-800 hover:text-black">Lupa kata sandi?</a>
-                </div>
-
-                <div className="flex flex-col space-y-4 pt-10">
-
-                  <button
-                    type="button"
-                    className="flex w-full items-center justify-center rounded-2xl border border-[#0095F6] px-4 py-3 text-[14px] font-bold text-[#0095F6] hover:bg-blue-50 transition-all"
-                  >
-                    Buat akun baru
-                  </button>
-                </div>
-              </form>
+              <LoginForm />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Footer Branding - Adjusted Typography */}
+      {/* Footer Branding */}
       <footer className="w-full bg-slate-50/50 border-t border-slate-100 py-6">
         <div className="max-w-[1200px] mx-auto px-6 lg:px-12 flex flex-col sm:flex-row items-center justify-between gap-6 text-slate-400 text-[12px] font-medium">
           <div className="flex items-center gap-2">

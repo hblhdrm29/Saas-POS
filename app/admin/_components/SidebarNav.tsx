@@ -6,12 +6,11 @@ import { LayoutDashboard, Package, Receipt, Ticket, History, PlusCircle, Users }
 
 const navItems = [
   { href: "/admin", icon: LayoutDashboard, label: "Dashboard" },
-  { href: "/kasir", icon: PlusCircle, label: "New Transaction" },
   { href: "/admin/products", icon: Package, label: "Master Data" },
   { href: "/admin/transactions", icon: Receipt, label: "Transaction" },
   { href: "/admin/users", icon: Users, label: "Staff" },
   { href: "/admin/promotions", icon: Ticket, label: "Promotions" },
-  { href: "/admin/shifts", icon: History, label: "Reports" },
+  { href: "/admin/shifts", icon: History, label: "Laporan Shift" },
 ];
 
 export default function SidebarNav() {

@@ -2,8 +2,10 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { LogOut, Home, Settings } from "lucide-react";
 import { signOut } from "@/auth";
+import { getActiveShift } from "@/app/actions/shift";
 import Link from "next/link";
 import Image from "next/image";
+import LogoutButton from "./_components/LogoutButton";
 
 import logoBlueiy from "../assets/logo/blueiy_premium.png";
 
@@ -18,10 +20,16 @@ export default async function POSLayout({
     redirect("/login");
   }
 
+  const shiftRes = await getActiveShift({});
+  // Serialize to plain object to avoid hydration issues with Date objects
+  const activeShift = shiftRes && 'data' in shiftRes && shiftRes.data 
+    ? JSON.parse(JSON.stringify(shiftRes.data)) 
+    : null;
+
   return (
-    <div className="flex h-screen bg-[#F8FAFC] font-sans text-slate-900 overflow-hidden" style={{ fontFamily: 'Arial, sans-serif' }}>
+    <div className="flex h-screen bg-[#F8FAFC] font-jakarta text-slate-900 overflow-hidden">
       {/* Mini Sidebar for POS Tools */}
-      <aside className="w-20 bg-white border-r border-slate-100 flex flex-col items-center py-6 justify-between z-10 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+      <aside className="w-20 bg-white border-r border-slate-100 flex flex-col items-center py-6 justify-between z-[100] shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
         <div className="space-y-8 flex flex-col items-center w-full">
           
           <nav className="flex flex-col gap-4 w-full px-3">
@@ -36,17 +44,9 @@ export default async function POSLayout({
           </nav>
         </div>
 
-        <form
-          className="px-3 w-full"
-          action={async () => {
-            "use server";
-            await signOut();
-          }}
-        >
-          <button type="submit" className="w-full p-4 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all active:scale-90 flex items-center justify-center">
-            <LogOut className="w-5 h-5" />
-          </button>
-        </form>
+        <div className="pb-6 w-full px-3">
+           <LogoutButton activeShift={activeShift} />
+        </div>
       </aside>
 
       {/* Main POS Interface */}

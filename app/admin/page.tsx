@@ -27,8 +27,8 @@ export default async function AdminDashboard() {
          {/* Professional Header */}
          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-               <h1 className="text-xl font-bold text-slate-900">Dashboard Overview</h1>
-               <p className="text-sm text-slate-500 font-medium">Monitoring performa bisnis Anda secara real-time.</p>
+               <h1 className="text-xl font-bold text-slate-900 tracking-tight">Dashboard Overview</h1>
+               <p className="text-slate-400 text-[11px] font-medium leading-none mt-1">Monitoring performa bisnis Anda secara real-time.</p>
             </div>
             <div className="flex gap-2">
                <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-[13px] font-semibold text-slate-600 hover:bg-slate-50 transition-all">
@@ -39,10 +39,6 @@ export default async function AdminDashboard() {
                   <Download className="w-4 h-4" />
                   <span>Export</span>
                </button>
-               <Link href="/kasir" className="flex items-center gap-2 px-4 py-2 bg-[#0066FF] rounded-lg text-[13px] font-semibold text-white hover:bg-blue-700 transition-all shadow-sm">
-                  <PlusCircle className="w-4 h-4" />
-                  <span>New Transaction</span>
-               </Link>
             </div>
          </div>
 
@@ -58,8 +54,8 @@ export default async function AdminDashboard() {
                   </div>
                </div>
                <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Revenue</p>
-                  <h3 className="text-2xl font-bold text-slate-900 mt-1">{formatRp(stats?.totalRevenue || 0)}</h3>
+                  <p className="text-[11px] font-bold text-slate-400 tracking-tight uppercase">Total Revenue</p>
+                  <h3 className="text-lg font-black text-slate-900 mt-1">{formatRp(stats?.totalRevenue || 0)}</h3>
                </div>
             </div>
 
@@ -73,8 +69,8 @@ export default async function AdminDashboard() {
                   </div>
                </div>
                <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Transactions</p>
-                  <h3 className="text-2xl font-bold text-slate-900 mt-1">{stats?.totalTransactions || 0}</h3>
+                  <p className="text-[11px] font-bold text-slate-400 tracking-tight uppercase">Total Transactions</p>
+                  <h3 className="text-lg font-black text-slate-900 mt-1">{stats?.totalTransactions || 0}</h3>
                </div>
             </div>
 
@@ -85,8 +81,8 @@ export default async function AdminDashboard() {
                   </div>
                </div>
                <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Avg. Ticket</p>
-                  <h3 className="text-2xl font-bold text-slate-900 mt-1">{formatRp(stats?.avgTicket || 0)}</h3>
+                  <p className="text-[11px] font-bold text-slate-400 tracking-tight uppercase">Avg. Ticket</p>
+                  <h3 className="text-lg font-black text-slate-900 mt-1">{formatRp(stats?.avgTicket || 0)}</h3>
                </div>
             </div>
 
@@ -98,8 +94,8 @@ export default async function AdminDashboard() {
                   {lowStock.length > 0 && <span className="bg-red-500 w-2 h-2 rounded-full animate-pulse mt-1" />}
                </div>
                <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Low Stock Items</p>
-                  <h3 className="text-2xl font-bold text-slate-900 mt-1">{lowStock.length} Products</h3>
+                  <p className="text-[11px] font-bold text-slate-400 tracking-tight uppercase">Low Stock Items</p>
+                  <h3 className="text-lg font-black text-slate-900 mt-1">{lowStock.length} Products</h3>
                </div>
             </div>
          </div>

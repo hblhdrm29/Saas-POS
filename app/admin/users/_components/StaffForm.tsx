@@ -19,6 +19,7 @@ export default function StaffForm({ onClose }: StaffFormProps) {
         email: "",
         password: "",
         role: "CASHIER" as "ADMIN" | "CASHIER",
+        shift: "",
     });
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -122,7 +123,8 @@ export default function StaffForm({ onClose }: StaffFormProps) {
                                     setFormData({ 
                                         ...formData, 
                                         role: "ADMIN",
-                                        email: username ? `${username}@adminblueiy.com` : ""
+                                        email: username ? `${username}@adminblueiy.com` : "",
+                                        shift: ""
                                     });
                                 }}
                                 className={`flex items-center justify-center p-2.5 rounded-xl border text-[11px] font-bold transition-all ${formData.role === "ADMIN"
@@ -153,6 +155,34 @@ export default function StaffForm({ onClose }: StaffFormProps) {
                             </button>
                         </div>
                     </div>
+
+                    {/* Shift Selection for Cashier */}
+                    {formData.role === "CASHIER" && (
+                        <div className="space-y-1.5 animate-in fade-in slide-in-from-top-2 duration-500">
+                            <label className="text-[10px] font-bold text-slate-400 ml-1">Pilih Jadwal Shift</label>
+                            <div className="grid grid-cols-3 gap-2">
+                                {[
+                                    { id: 'Pagi', label: 'Pagi', time: '08:00 - 16:00' },
+                                    { id: 'Siang', label: 'Siang', time: '16:00 - 00:00' },
+                                    { id: 'Malam', label: 'Malam', time: '00:00 - 08:00' },
+                                ].map((shift) => (
+                                    <button
+                                        key={shift.id}
+                                        type="button"
+                                        onClick={() => setFormData({ ...formData, shift: shift.id })}
+                                        className={`flex flex-col items-center justify-center p-2 rounded-2xl border transition-all ${formData.shift === shift.id 
+                                            ? "bg-slate-900 border-slate-900 text-white shadow-lg shadow-slate-200" 
+                                            : "bg-white border-slate-100 text-slate-400 hover:border-slate-200"}`}
+                                    >
+                                        <span className="text-[11px] font-bold">{shift.label}</span>
+                                        <span className={`text-[8px] font-medium opacity-60 ${formData.shift === shift.id ? "text-white" : "text-slate-400"}`}>
+                                            {shift.time}
+                                        </span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     <div className="pt-4">
                         <button

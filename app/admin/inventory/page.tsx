@@ -45,8 +45,8 @@ export default async function InventoryPage() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900">Inventory Management</h1>
-                    <p className="text-slate-500 text-sm">Track stock movements and audit history.</p>
+                    <h1 className="text-xl font-bold text-slate-900 tracking-tight">Inventory Management</h1>
+                    <p className="text-slate-400 text-[11px] font-medium leading-none mt-1">Track stock movements and audit history.</p>
                 </div>
                 <button className="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition-all active:scale-95 shadow-lg shadow-slate-200">
                     <Package className="w-4 h-4" /> Receive Stock

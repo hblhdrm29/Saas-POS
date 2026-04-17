@@ -12,6 +12,7 @@ const staffSchema = z.object({
     email: z.string().email("Invalid email address"),
     password: z.string().min(4, "Password must be at least 4 characters"),
     role: z.enum(["ADMIN", "CASHIER"]),
+    shift: z.string().optional(),
 });
 
 export const createStaff = authAction(staffSchema, async (data, ctx) => {
@@ -39,6 +40,7 @@ export const createStaff = authAction(staffSchema, async (data, ctx) => {
             email: data.email,
             passwordHash: data.password,
             role: data.role,
+            shift: data.shift,
             tenantId: ctx.tenantId,
         });
 

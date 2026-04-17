@@ -27,9 +27,9 @@ export default async function ProductsPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-black text-slate-900 tracking-tight">Manajemen Produk</h1>
-        <p className="text-slate-500 text-sm font-medium">Kelola inventaris dan katalog barang toko Anda</p>
+      <div className="flex flex-col">
+        <h1 className="text-xl font-bold text-slate-900 tracking-tight">Manajemen Produk</h1>
+        <p className="text-slate-400 text-[11px] font-medium leading-none mt-1">Kelola inventaris dan katalog barang toko Anda</p>
       </div>
 
       <ProductList 

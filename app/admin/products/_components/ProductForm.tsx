@@ -1,9 +1,17 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { X, Loader2, Save, Upload, ImageIcon, Trash2, AlertCircle, ChevronLeft } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { 
+  X, 
+  Loader2, 
+  Save, 
+  Upload, 
+  ImageIcon, 
+  Trash2, 
+  AlertCircle, 
+  Package 
+} from "lucide-react";
 import { createProduct, updateProduct, uploadImage, getNextSku } from "@/app/actions/product";
-import { useEffect } from "react";
 
 interface ProductFormProps {
   product?: any;
@@ -19,11 +27,21 @@ export default function ProductForm({ product, categories, onClose, onSuccess }:
   const [imagePreview, setImagePreview] = useState<string>(product?.image || "");
   const [sku, setSku] = useState(product?.sku || "");
   const [selectedCategory, setSelectedCategory] = useState<number | null>(product?.categoryId || null);
+  const [displayPrice, setDisplayPrice] = useState(
+    product?.price ? product.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : ""
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, "");
+    // Prevent starting with multiple zeros
+    const cleanValue = value === "" ? "" : parseInt(value).toString();
+    const formatted = cleanValue.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    setDisplayPrice(formatted);
+  };
 
   const isEdit = !!product;
 
-  // Auto SKU logic
   useEffect(() => {
     if (!isEdit && selectedCategory) {
       const fetchSku = async () => {
@@ -42,10 +60,8 @@ export default function ProductForm({ product, categories, onClose, onSuccess }:
     setError("");
 
     const formData = new FormData(e.currentTarget);
-    
     let imagePath = imagePreview;
 
-    // Handle real file upload if new file selected
     if (imageFile) {
         const uploadData = new FormData();
         uploadData.append("image", imageFile);
@@ -63,7 +79,7 @@ export default function ProductForm({ product, categories, onClose, onSuccess }:
       id: product?.id,
       name: formData.get("name") as string,
       sku: formData.get("sku") as string,
-      price: Number(formData.get("price")),
+      price: Number(displayPrice.replace(/\./g, "")),
       stock: Number(formData.get("stock")),
       categoryId: formData.get("categoryId") ? Number(formData.get("categoryId")) : null,
       lowStockThreshold: Number(formData.get("lowStockThreshold")),
@@ -86,196 +102,215 @@ export default function ProductForm({ product, categories, onClose, onSuccess }:
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white w-full max-w-md rounded-[2.5rem] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 border border-slate-100">
-        <div className="bg-slate-900 p-6 text-white relative overflow-hidden">
-          <div className="absolute right-0 top-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16" />
-          <div className="relative z-10 flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-xl transition-all active:scale-95 text-slate-400">
-                <ChevronLeft className="w-5 h-5 text-white" />
-              </button>
-              <div>
-                <h3 className="text-lg font-black tracking-tight leading-none">{isEdit ? "Perbarui Produk" : "Produk Baru"}</h3>
-                <p className="text-slate-400 text-[9px] font-bold uppercase tracking-widest mt-1 opacity-60">Katalog & Stok</p>
-              </div>
-            </div>
+    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+      <div className="bg-white w-full max-w-[400px] rounded-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 border border-slate-200 font-jakarta">
+        {/* Minimal Header */}
+        <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+             <div className="w-8 h-8 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-center">
+                <Package className="w-4 h-4 text-slate-400" />
+             </div>
+             <div>
+                <h3 className="text-[13px] font-bold text-slate-900 leading-none">{isEdit ? "Edit Product" : "New Product"}</h3>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Inventory Management</p>
+             </div>
           </div>
+          <button 
+            type="button"
+            onClick={onClose} 
+            className="w-8 h-8 flex items-center justify-center hover:bg-slate-50 rounded-lg transition-all text-slate-400 hover:text-slate-600"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
-        <div className="bg-slate-50 p-5 flex flex-col items-center border-b border-slate-100">
-            <div className="relative group hover:scale-[1.02] transition-transform">
-                <div className="w-28 h-28 rounded-[2rem] bg-white border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden shadow-sm relative group-hover:border-blue-400 transition-colors">
-                    {imagePreview ? (
-                        <img src={imagePreview} className="w-full h-full object-cover" />
-                    ) : (
-                        <div className="text-center p-4">
-                            <ImageIcon className="w-8 h-8 text-slate-200 mx-auto mb-2" />
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-tight">Belum Ada Foto</p>
-                        </div>
-                    )}
-                </div>
-                
-                <input 
-                    type="file" 
-                    ref={fileInputRef}
-                    className="hidden" 
-                    accept="image/*"
-                    onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                            setImageFile(file);
-                            setImagePreview(URL.createObjectURL(file));
-                        }
-                    }}
-                />
+        <form onSubmit={handleSubmit} className="p-0">
+          <div className="max-h-[70vh] overflow-y-auto px-6 py-6 space-y-5 custom-scrollbar">
+            {error && (
+              <div className="p-3 rounded-xl bg-red-50 text-red-600 text-[10px] font-bold border border-red-100 flex items-center gap-2">
+                <AlertCircle className="w-3.5 h-3.5" />
+                <span>{error}</span>
+              </div>
+            )}
 
-                <div className="absolute -bottom-2 -right-2 flex gap-1">
-                    <button 
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="w-10 h-10 bg-blue-600 text-white rounded-xl shadow-lg shadow-blue-500/30 flex items-center justify-center hover:bg-blue-700 transition-all active:scale-90"
-                    >
-                        <Upload className="w-4 h-4" />
-                    </button>
-                    {imagePreview && (
-                        <button 
+            {/* Compact Image Section */}
+            <div className="flex items-center gap-4 p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
+                <div className="relative group">
+                    <div className="w-16 h-16 rounded-xl bg-white border border-slate-200 flex items-center justify-center overflow-hidden shadow-sm">
+                        {imagePreview ? (
+                            <img src={imagePreview} className="w-full h-full object-cover" alt="Preview" />
+                        ) : (
+                            <ImageIcon className="w-5 h-5 text-slate-200" />
+                        )}
+                    </div>
+                    <input 
+                        type="file" 
+                        ref={fileInputRef}
+                        className="hidden" 
+                        accept="image/*"
+                        onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                                setImageFile(file);
+                                setImagePreview(URL.createObjectURL(file));
+                            }
+                        }}
+                    />
+                </div>
+                <div>
+                   <p className="text-[10px] font-bold text-slate-900 uppercase tracking-tight">Foto Produk</p>
+                   <p className="text-[9px] text-slate-400 font-medium leading-tight mt-0.5">Rasio 1:1</p>
+                   <div className="flex gap-2 mt-2">
+                       <button 
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="px-3 py-1 bg-white border border-slate-200 rounded-lg text-[9px] font-bold text-slate-600 hover:bg-slate-50 transition-all active:scale-95"
+                       >
+                           {imagePreview ? "Change" : "Upload"}
+                       </button>
+                       {imagePreview && (
+                         <button 
                             type="button"
                             onClick={() => {
                                 setImageFile(null);
                                 setImagePreview("");
                                 if (fileInputRef.current) fileInputRef.current.value = "";
                             }}
-                            className="w-10 h-10 bg-white text-red-500 border border-red-50 rounded-xl shadow-lg flex items-center justify-center hover:bg-red-50 transition-all active:scale-90"
-                        >
-                            <Trash2 className="w-4 h-4" />
-                        </button>
-                    )}
+                            className="px-3 py-1 bg-white border border-red-100 rounded-lg text-[9px] font-bold text-red-500 hover:bg-red-50 transition-all active:scale-95"
+                         >
+                             Remove
+                         </button>
+                       )}
+                   </div>
                 </div>
             </div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-6">Foto Produk (Rasio 1:1)</p>
-        </div>
 
-        <form onSubmit={handleSubmit} className="p-7 space-y-4">
-          {error && (
-            <div className="p-3 rounded-xl bg-red-50 text-red-600 text-[11px] font-bold border border-red-100 flex items-center gap-2">
-              <AlertCircle className="w-3.5 h-3.5" />
-              <span>{error}</span>
+            {/* Info Dasar */}
+            <div className="space-y-4">
+               {/* Nama */}
+               <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Nama Produk</label>
+                  <input
+                    name="name"
+                    defaultValue={product?.name}
+                    required
+                    placeholder="Contoh: Kopi Susu Gula Aren"
+                    className="w-full px-4 py-2 bg-slate-50/50 border border-slate-200/60 rounded-xl focus:bg-white focus:border-[#0066FF] focus:ring-4 focus:ring-blue-50 outline-none transition-all text-[12px] font-bold text-slate-900"
+                  />
+               </div>
+
+               {/* Grid Metrik */}
+               <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Kategori</label>
+                    <div className="relative">
+                      <select
+                        name="categoryId"
+                        value={selectedCategory || ""}
+                        onChange={(e) => setSelectedCategory(e.target.value ? Number(e.target.value) : null)}
+                        className="w-full px-4 py-2 bg-slate-50/50 border border-slate-200/60 rounded-xl focus:bg-white focus:border-[#0066FF] focus:ring-4 focus:ring-blue-50 outline-none transition-all text-[12px] font-bold text-slate-900 appearance-none"
+                      >
+                        <option value="">Pilih Kategori</option>
+                        {categories.map((cat) => (
+                          <option key={cat.id} value={cat.id}>{cat.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Kode SKU</label>
+                    <input
+                      type="text"
+                      name="sku"
+                      value={sku}
+                      onChange={(e) => setSku(e.target.value)}
+                      placeholder="PROD-XXXX"
+                      required
+                      className="w-full px-4 py-2 bg-slate-50/50 border border-slate-200/60 rounded-xl focus:bg-white focus:border-[#0066FF] focus:ring-4 focus:ring-blue-50 outline-none transition-all text-[12px] font-bold text-slate-900"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Harga Jual</label>
+                    <div className="relative">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-[10px] font-bold uppercase">Rp.</span>
+                      <input
+                        name="price"
+                        type="text"
+                        value={displayPrice}
+                        onChange={handlePriceChange}
+                        required
+                        placeholder="0"
+                        className="w-full pl-12 pr-4 py-2 bg-slate-50/50 border border-slate-200/60 rounded-xl focus:bg-white focus:border-[#0066FF] focus:ring-4 focus:ring-blue-50 outline-none transition-all text-[12px] font-bold text-slate-900 tabular-nums"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Stok Saat Ini</label>
+                    <input
+                      name="stock"
+                      type="number"
+                      defaultValue={product?.stock || 0}
+                      required
+                      className="w-full px-4 py-2 bg-slate-50/50 border border-slate-200/60 rounded-xl focus:bg-white focus:border-[#0066FF] focus:ring-4 focus:ring-blue-50 outline-none transition-all text-[12px] font-bold text-slate-900 tabular-nums"
+                    />
+                  </div>
+               </div>
+
+               {/* Section Stok & Status */}
+               <div className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Batas Minimum</label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        name="lowStockThreshold"
+                        type="number"
+                        defaultValue={product?.lowStockThreshold || 5}
+                        required
+                        className="w-20 px-3 py-1.5 bg-slate-50 border border-slate-200/60 rounded-lg focus:bg-white focus:border-[#0066FF] outline-none transition-all text-[11px] font-bold text-slate-900 tabular-nums"
+                      />
+                      <span className="text-[10px] font-bold text-slate-300 uppercase tracking-tight">Pcs</span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end gap-1.5">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status Aktif</label>
+                    <div className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        name="isActive"
+                        id="isActive"
+                        defaultChecked={product ? product.isActive : true}
+                        className="sr-only peer"
+                      />
+                      <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2.5px] after:start-[2.5px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#0066FF]"></div>
+                    </div>
+                  </div>
+               </div>
             </div>
-          )}
-
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Nama Produk</label>
-            <input
-              name="name"
-              defaultValue={product?.name}
-              required
-              placeholder="Contoh: Kopi Susu Aren"
-              className="w-full px-5 py-2.5 rounded-2xl bg-slate-50 border border-slate-100 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50 outline-none transition-all text-[13px] font-bold"
-            />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Kategori</label>
-              <select
-                name="categoryId"
-                value={selectedCategory || ""}
-                onChange={(e) => setSelectedCategory(e.target.value ? Number(e.target.value) : null)}
-                className="w-full px-5 py-2.5 rounded-2xl bg-slate-50 border border-slate-100 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50 outline-none transition-all text-[13px] font-bold"
-              >
-                <option value="">Pilih Kategori</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">SKU / Kode</label>
-              <input
-                type="text"
-                name="sku"
-                value={sku}
-                onChange={(e) => setSku(e.target.value)}
-                placeholder="FOOD 001"
-                required
-                className="w-full px-5 py-2.5 rounded-2xl bg-slate-50 border border-slate-100 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50 outline-none transition-all text-[13px] font-bold"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Harga Jual</label>
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-[11px] font-bold">Rp</span>
-                <input
-                  name="price"
-                  type="number"
-                  defaultValue={product?.price ? Number(product.price) : ""}
-                  required
-                  placeholder="0"
-                  className="w-full pl-10 pr-5 py-2.5 rounded-2xl bg-slate-50 border border-slate-100 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50 outline-none transition-all text-[13px] font-bold tabular-nums"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Stok Awal</label>
-              <input
-                name="stock"
-                type="number"
-                defaultValue={product?.stock || 0}
-                required
-                className="w-full px-5 py-2.5 rounded-2xl bg-slate-50 border border-slate-100 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50 outline-none transition-all text-[13px] font-bold tabular-nums"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Batas Minimum</label>
-              <input
-                name="lowStockThreshold"
-                type="number"
-                defaultValue={product?.lowStockThreshold || 5}
-                required
-                className="w-full px-5 py-2.5 rounded-2xl bg-slate-50 border border-slate-100 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50 outline-none transition-all text-[13px] font-bold tabular-nums"
-              />
-            </div>
-
-            <div className="flex items-center gap-3 px-1 pt-5">
-              <div className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  name="isActive"
-                  id="isActive"
-                  defaultChecked={product ? product.isActive : true}
-                  className="sr-only peer"
-                />
-                <div className="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
-                <label htmlFor="isActive" className="ms-3 text-[10px] font-extrabold text-slate-500 uppercase tracking-widest">Aktif</label>
-              </div>
-            </div>
-          </div>
-
-          <div className="pt-6 flex gap-3">
+          <div className="p-6 bg-white border-t border-slate-50 flex gap-3">
             <button
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="flex-1 py-4.5 rounded-2xl border border-slate-100 text-slate-500 text-sm font-bold hover:bg-slate-50 transition-all font-jakarta"
+              className="flex-1 py-3 px-4 rounded-xl border border-slate-200 text-slate-500 text-[11px] font-bold hover:bg-slate-50 transition-all active:scale-[0.98]"
             >
-              Batal
+              Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-[2] py-4.5 rounded-2xl bg-slate-900 text-white text-sm font-bold hover:bg-slate-800 shadow-xl shadow-slate-200 disabled:opacity-50 transition-all flex items-center justify-center gap-2 font-jakarta"
+              className="flex-[2] py-3 px-4 rounded-xl bg-slate-900 text-white text-[11px] font-bold hover:bg-slate-800 shadow-lg shadow-slate-100 disabled:opacity-50 transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
             >
               {loading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
               ) : (
                 <>
-                  <Save className="w-4 h-4" />
-                  {isEdit ? "Simpan Perubahan" : "Simpan Produk"}
+                  <Save className="w-3.5 h-3.5" />
+                  <span>{isEdit ? "Update Changes" : "Save Product"}</span>
                 </>
               )}
             </button>

@@ -2,7 +2,13 @@ import { db } from "@/db";
 import { shifts, users } from "@/db/schema";
 import { auth } from "@/auth";
 import { eq, desc } from "drizzle-orm";
-import { History, Banknote, Clock, User, AlertCircle, CheckCircle2, ChevronRight, Calculator } from "lucide-react";
+import { 
+  ChevronRight, 
+  ArrowUpRight, 
+  AlertTriangle,
+  History,
+  Circle
+} from "lucide-react";
 
 export default async function ShiftsPage() {
     const session = await auth();
@@ -26,124 +32,142 @@ export default async function ShiftsPage() {
         .where(eq(shifts.tenantId, user.tenantId))
         .orderBy(desc(shifts.startTime));
 
+    const totalShifts = shiftList.length;
+    const closedShifts = shiftList.filter(s => s.status === 'CLOSED');
+    const shiftsWithDiscrepancy = closedShifts.filter(s => {
+        const expected = Number(s.startingCash) + Number(s.totalSalesCash);
+        const actual = Number(s.actualCash || 0);
+        return Math.abs(actual - expected) > 1;
+    }).length;
+
     const formatCurrency = (val: any) => {
         return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(Number(val));
     };
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold text-slate-900">Shift Reconciliation</h1>
-                    <p className="text-slate-500 text-sm">Monitor cashier shifts and verify cash balances.</p>
+        <div className="max-w-[1200px] mx-auto space-y-12 py-10 animate-in fade-in duration-1000">
+            {/* Header: Ultra-Minimalist */}
+            <div className="flex flex-col gap-8">
+                <div className="space-y-1">
+                    <h1 className="text-[28px] font-black text-slate-900 tracking-tight">Laporan Shift</h1>
+                    <p className="text-slate-400 text-[13px] font-medium tracking-tight">Audit harian dan rekonsiliasi kas operasional.</p>
+                </div>
+
+                <div className="flex items-center gap-12 border-b border-slate-100 pb-8">
+                    <div className="space-y-1">
+                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Sesi</p>
+                         <p className="text-2xl font-black text-slate-900 tabular-nums">{totalShifts}</p>
+                    </div>
+                    <div className="w-px h-8 bg-slate-100" />
+                    <div className="space-y-1">
+                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sesi Aktif</p>
+                         <div className="flex items-center gap-2">
+                            <p className="text-2xl font-black text-blue-600 tabular-nums">{shiftList.filter(s => s.status === 'OPEN').length}</p>
+                            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse mt-1" />
+                         </div>
+                    </div>
+                    <div className="w-px h-8 bg-slate-100" />
+                    <div className="space-y-1">
+                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Temuan Selisih</p>
+                         <p className={`text-2xl font-black tabular-nums ${shiftsWithDiscrepancy > 0 ? 'text-red-500' : 'text-slate-300'}`}>
+                            {shiftsWithDiscrepancy}
+                         </p>
+                    </div>
                 </div>
             </div>
 
-            <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
-                <table className="w-full text-left border-collapse">
-                    <thead>
-                        <tr className="bg-slate-50/50 text-slate-500 text-[10px] font-black tracking-wider border-b border-slate-100">
-                            <th className="px-8 py-5">Cashier</th>
-                            <th className="px-8 py-5">Position</th>
-                            <th className="px-8 py-5">Shift Time</th>
-                            <th className="px-8 py-5">Expected Cash</th>
-                            <th className="px-8 py-5">Actual Cash</th>
-                            <th className="px-8 py-5">Discrepancy</th>
-                            <th className="px-8 py-5">Status</th>
-                            <th className="px-8 py-5 text-right">Details</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-50">
-                        {shiftList.length === 0 ? (
-                            <tr><td colSpan={7} className="px-8 py-20 text-center text-slate-400 text-sm">No shift history found.</td></tr>
-                        ) : (
-                            shiftList.map((shift) => {
-                                const expectedTotal = Number(shift.startingCash) + Number(shift.totalSalesCash);
-                                const actualTotal = Number(shift.actualCash || 0);
-                                const discrepancy = actualTotal - expectedTotal;
-                                const isDiscrepancy = discrepancy !== 0 && shift.status === 'CLOSED';
+            {/* List: Invisible UI Pattern */}
+            <div className="space-y-0 text-[13px]">
+                <div className="grid grid-cols-[1.5fr_1.2fr_1fr_1fr_1.2fr_100px] gap-4 px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] border-b border-slate-100">
+                    <div>Kasir</div>
+                    <div>Periode</div>
+                    <div className="text-right">Seharusnya</div>
+                    <div className="text-right">Uang Fisik</div>
+                    <div className="text-center">Audit</div>
+                    <div className="text-right">Status</div>
+                </div>
 
-                                return (
-                                    <tr key={shift.id} className="hover:bg-slate-50/30 transition-all group">
-                                        <td className="px-8 py-6">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-9 h-9 bg-slate-100 rounded-xl flex items-center justify-center">
-                                                    <User className="w-4 h-4 text-slate-400 group-hover:text-blue-600 transition-colors" />
-                                                </div>
-                                                <span className="text-sm font-bold text-slate-800">{shift.userName || 'Unknown'}</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-8 py-6">
-                                            <span className={`text-[10px] font-black tracking-wider px-2 py-1 rounded-md ${shift.userRole === 'ADMIN' ? 'bg-blue-50 text-blue-600' : 'bg-slate-50 text-slate-500'}`}>
-                                                {shift.userRole === 'ADMIN' ? 'Admin' : 'Kasir'}
+                {shiftList.length === 0 ? (
+                    <div className="py-20 text-center text-slate-300 font-bold">Belum ada riwayat shift.</div>
+                ) : (
+                    shiftList.map((shift) => {
+                        const expectedTotal = Number(shift.startingCash) + Number(shift.totalSalesCash);
+                        const actualTotal = Number(shift.actualCash || 0);
+                        const discrepancy = actualTotal - expectedTotal;
+                        const isMatch = Math.abs(discrepancy) <= 1;
+
+                        return (
+                            <div 
+                                key={shift.id} 
+                                className="grid grid-cols-[1.5fr_1.2fr_1fr_1fr_1.2fr_100px] gap-4 px-6 py-6 items-center border-b border-slate-50 hover:bg-slate-50/50 transition-colors group cursor-default"
+                            >
+                                {/* Kasir */}
+                                <div className="flex flex-col">
+                                    <span className="font-bold text-slate-900 tracking-tight">{shift.userName || 'Anonymous'}</span>
+                                    <span className="text-[10px] font-medium text-slate-400">{shift.userRole === 'ADMIN' ? 'Administrator' : 'Staff Kasir'}</span>
+                                </div>
+
+                                {/* Periode */}
+                                <div className="flex flex-col gap-0.5">
+                                    <span className="font-bold text-slate-700 tabular-nums">
+                                        {new Date(shift.startTime).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                                        <span className="mx-1 text-slate-200">-</span>
+                                        {shift.endTime ? new Date(shift.endTime).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : 'Aktif'}
+                                    </span>
+                                    <span className="text-[10px] font-medium text-slate-400 uppercase">{new Date(shift.startTime).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</span>
+                                </div>
+
+                                {/* Seharusnya */}
+                                <div className="text-right font-black text-slate-900 tabular-nums tracking-tighter">
+                                    {formatCurrency(expectedTotal).replace('Rp ', '')}
+                                </div>
+
+                                {/* Fisik */}
+                                <div className="text-right font-black text-slate-900 tabular-nums tracking-tighter">
+                                    {shift.status === 'CLOSED' ? formatCurrency(actualTotal).replace('Rp ', '') : '—'}
+                                </div>
+
+                                {/* Audit */}
+                                <div className="flex justify-center">
+                                    {shift.status === 'CLOSED' ? (
+                                        <div className="flex items-center gap-2">
+                                            <div className={`w-1.5 h-1.5 rounded-full ${isMatch ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                                            <span className={`text-[11px] font-black tabular-nums ${isMatch ? 'text-slate-400' : 'text-red-500'}`}>
+                                                {isMatch ? 'Sesuai' : formatCurrency(Math.abs(discrepancy)).replace('Rp ', '')}
                                             </span>
-                                        </td>
-                                        <td className="px-8 py-6">
-                                            <div className="flex flex-col gap-1">
-                                                <div className="flex items-center gap-2 text-xs font-bold text-slate-700">
-                                                    <Clock className="w-3 h-3 text-slate-300" />
-                                                    {new Date(shift.startTime).toLocaleTimeString()} - {shift.endTime ? new Date(shift.endTime).toLocaleTimeString() : 'Active'}
-                                                </div>
-                                                <span className="text-[10px] text-slate-400 font-medium">{new Date(shift.startTime).toLocaleDateString()}</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-8 py-6">
-                                            <div className="flex flex-col">
-                                                <span className="text-xs font-black text-slate-800">{formatCurrency(expectedTotal)}</span>
-                                                <span className="text-[10px] text-slate-400">Modal: {formatCurrency(shift.startingCash)}</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-8 py-6">
-                                            {shift.status === 'CLOSED' ? (
-                                                <span className="text-xs font-black text-slate-800">{formatCurrency(actualTotal)}</span>
-                                            ) : (
-                                                <span className="text-[10px] font-black tracking-widest text-blue-500 px-2 py-1 bg-blue-50 rounded">In Progress</span>
-                                            )}
-                                        </td>
-                                        <td className="px-8 py-6 text-sm font-black">
-                                            {shift.status === 'CLOSED' ? (
-                                                <div className={`flex items-center gap-1.5 ${discrepancy === 0 ? 'text-emerald-600' : discrepancy > 0 ? 'text-blue-600' : 'text-red-600'}`}>
-                                                    {discrepancy === 0 ? (
-                                                        <CheckCircle2 className="w-4 h-4" />
-                                                    ) : (
-                                                        <AlertCircle className="w-4 h-4" />
-                                                    )}
-                                                    <span>{discrepancy === 0 ? 'Balance Match' : formatCurrency(discrepancy)}</span>
-                                                </div>
-                                            ) : (
-                                                <span className="text-slate-300">—</span>
-                                            )}
-                                        </td>
-                                        <td className="px-8 py-6">
-                                            <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black tracking-widest ${shift.status === 'OPEN' ? 'bg-blue-50 text-blue-600' : 'bg-slate-100 text-slate-500'}`}>
-                                                {shift.status}
-                                            </span>
-                                        </td>
-                                        <td className="px-8 py-6 text-right">
-                                            <button className="p-2 text-slate-300 hover:text-blue-600 transition-all hover:bg-blue-50 rounded-xl">
-                                                <ChevronRight className="w-5 h-5" />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                );
-                            })
-                        )}
-                    </tbody>
-                </table>
+                                        </div>
+                                    ) : (
+                                        <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest italic">Berjalan</span>
+                                    )}
+                                </div>
+
+                                {/* Status */}
+                                <div className="text-right">
+                                    <span className={`text-[9px] font-black uppercase tracking-tighter ${shift.status === 'OPEN' ? 'text-blue-600' : 'text-slate-300'}`}>
+                                        {shift.status}
+                                    </span>
+                                </div>
+                            </div>
+                        );
+                    })
+                )}
             </div>
 
-            {/* Reconciliation Concept Card */}
-            {shiftList.some(s => s.status === 'CLOSED' && (Number(s.actualCash) - (Number(s.startingCash) + Number(s.totalSalesCash)) !== 0)) && (
-                <div className="bg-red-50 border border-red-100 p-8 rounded-[2rem] flex items-start gap-6 animate-in slide-in-from-bottom-4 duration-500">
-                    <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-red-600 shadow-sm border border-red-100">
-                        <AlertCircle className="w-8 h-8" />
+            {/* Subtle Alert: Senior Audit Pattern */}
+            {shiftsWithDiscrepancy > 0 && (
+                <div className="flex items-start gap-4 p-8 border border-red-50 rounded-3xl bg-red-50/10">
+                    <div className="p-2.5 bg-red-50 rounded-xl">
+                        <AlertTriangle className="w-5 h-5 text-red-500" />
                     </div>
-                    <div>
-                        <h4 className="text-lg font-black text-red-900 mb-1 tracking-tight">Perhatian: Selisih Uang Ditemukan</h4>
-                        <p className="text-red-700/80 text-sm font-medium max-w-2xl leading-relaxed">
-                            Beberapa shift tercatat memiliki selisih antara saldo yang diharapkan sistem dan uang fisik yang dihitung kasir. Silakan tinjau log pembatalan (VOID) atau hubungi kasir yang bersangkutan untuk klarifikasi.
+                    <div className="space-y-1">
+                        <h4 className="text-[13px] font-black text-slate-900">Perhatian Rekonsiliasi</h4>
+                        <p className="text-[12px] text-slate-500 leading-relaxed font-medium">
+                            Terdapat {shiftsWithDiscrepancy} rekaman shift dengan selisih saldo. Mohon bandingkan data penjualan harian dengan bukti kas fisik di laci kasir.
                         </p>
                     </div>
+                    <button className="ml-auto px-5 py-2.5 bg-white border border-slate-100 rounded-xl text-[11px] font-bold text-slate-900 hover:bg-slate-50 transition-all">
+                        Audit Lanjutan
+                    </button>
                 </div>
             )}
         </div>

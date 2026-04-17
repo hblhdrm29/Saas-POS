@@ -10,7 +10,11 @@ interface User {
     name: string | null;
     email: string;
     role: string;
-    createdAt: Date;
+    shift: string | null;
+    createdAt: string;
+    lastShiftStatus: string | null;
+    lastShiftStartTime: string | null;
+    lastShiftEndTime: string | null;
 }
 
 export default function StaffList({ initialStaff }: { initialStaff: User[] }) {
@@ -105,11 +109,12 @@ export default function StaffList({ initialStaff }: { initialStaff: User[] }) {
                     <thead>
                         <tr className="bg-slate-50/50 text-slate-400 text-[10px] font-bold tracking-wider border-b border-slate-100/80">
                             <th className="px-6 py-4 w-12 font-medium text-center">#</th>
-                            <th className="px-4 py-4 font-medium">Name</th>
-                            <th className="px-4 py-4 font-medium">Email</th>
-                            <th className="px-4 py-4 font-medium text-center">Position</th>
-                            <th className="px-4 py-4 font-medium text-center">Join Date</th>
-                            <th className="px-6 py-4 text-right font-medium">Action</th>
+                            <th className="px-4 py-4 font-medium text-left">NAMA STAFF</th>
+                            <th className="px-4 py-4 font-medium text-left">EMAIL / USERNAME</th>
+                            <th className="px-4 py-4 font-medium text-center">POSISI</th>
+                            <th className="px-4 py-4 font-medium text-center">SHIFT</th>
+                            <th className="px-4 py-4 font-medium text-center">JAM / CHECK-IN</th>
+                            <th className="px-6 py-4 text-right font-medium">AKSI</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50">
@@ -140,14 +145,42 @@ export default function StaffList({ initialStaff }: { initialStaff: User[] }) {
                                         </span>
                                     </td>
                                     <td className="px-4 py-4 text-center">
-                                        <span className="text-[11px] font-bold text-slate-500 tabular-nums">
-                                            {new Date(staff.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
-                                        </span>
+                                        {staff.role === 'CASHIER' ? (
+                                            <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider ${
+                                                staff.shift === 'Pagi' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
+                                                staff.shift === 'Siang' ? 'bg-orange-50 text-orange-600 border border-orange-100' :
+                                                staff.shift === 'Malam' ? 'bg-indigo-50 text-indigo-600 border border-indigo-100' :
+                                                'bg-slate-50 text-slate-400'
+                                            }`}>
+                                                {staff.shift || '-'}
+                                            </span>
+                                        ) : (
+                                            <span className="text-[10px] font-bold text-slate-300">-</span>
+                                        )}
+                                    </td>
+                                    <td className="px-4 py-4 text-center">
+                                        {staff.lastShiftStatus === 'OPEN' ? (
+                                            <div className="flex flex-col items-center gap-0.5">
+                                                <span className="text-[11px] font-black text-slate-900 tabular-nums">
+                                                    {staff.lastShiftStartTime ? new Date(staff.lastShiftStartTime).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-'}
+                                                </span>
+                                                <span className="text-[8px] font-bold text-emerald-500 uppercase tracking-widest">Check-in</span>
+                                            </div>
+                                        ) : staff.lastShiftStatus === 'CLOSED' ? (
+                                            <div className="flex flex-col items-center gap-0.5 opacity-60">
+                                                <span className="text-[11px] font-bold text-slate-500 tabular-nums">
+                                                    {staff.lastShiftEndTime ? new Date(staff.lastShiftEndTime).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-'}
+                                                </span>
+                                                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Checkout</span>
+                                            </div>
+                                        ) : (
+                                            <span className="text-[10px] font-bold text-slate-300">Belum Ada Shift</span>
+                                        )}
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <button 
                                             onClick={() => setDeletingId(staff.id)}
-                                            className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                            className="p-1.5 text-slate-200 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
                                             title="Hapus Staff"
                                         >
                                             <Trash2 className="w-4 h-4" />
