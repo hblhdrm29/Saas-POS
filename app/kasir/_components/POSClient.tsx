@@ -378,8 +378,8 @@ export default function POSClient({
                 className={`group bg-white p-5 rounded-[2rem] border-2 transition-all cursor-pointer relative flex flex-col justify-between aspect-[1/1.1] ${product.stock <= 0 ? 'opacity-50 grayscale cursor-not-allowed border-slate-100' : 'border-transparent hover:border-blue-600 hover:shadow-2xl hover:shadow-blue-900/10 active:scale-95'}`}
               >
                 {/* Stock Badge */}
-                <div className={`absolute top-4 right-4 px-2 py-1 rounded-lg text-[9px] font-bold ${product.stock < 5 ? 'bg-red-50 text-red-600' : 'bg-slate-50 text-slate-500'}`}>
-                  Stock: {product.stock}
+                <div className={`absolute top-4 right-4 z-10 px-2 py-1 rounded-lg text-[9px] font-bold ${product.stock < 5 ? 'bg-red-50 text-red-600' : 'bg-slate-50 text-slate-500'}`}>
+                  Stok: {product.stock}
                 </div>
 
                 <div className="flex-1 flex items-center justify-center mb-4 relative overflow-hidden rounded-2xl bg-slate-50 border border-slate-100/50 group-hover:bg-blue-50 transition-colors">

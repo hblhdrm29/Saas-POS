@@ -61,14 +61,7 @@ export default async function AdminLayout({
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col h-full bg-[#F8FAFC] relative z-10 overflow-hidden">
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-50">
-          <div className="flex-1 max-w-sm relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input 
-              type="text" 
-              placeholder="Search data..." 
-              className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-transparent rounded-md focus:bg-white focus:border-slate-200 transition-all text-[13px] font-medium placeholder:text-slate-400 outline-none"
-            />
-          </div>
+          <div className="flex-1" />
           
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-3">

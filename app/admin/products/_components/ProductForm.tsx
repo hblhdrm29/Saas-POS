@@ -27,9 +27,12 @@ export default function ProductForm({ product, categories, onClose, onSuccess }:
   const [imagePreview, setImagePreview] = useState<string>(product?.image || "");
   const [sku, setSku] = useState(product?.sku || "");
   const [selectedCategory, setSelectedCategory] = useState<number | null>(product?.categoryId || null);
-  const [displayPrice, setDisplayPrice] = useState(
-    product?.price ? product.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : ""
-  );
+  const [displayPrice, setDisplayPrice] = useState(() => {
+    if (!product?.price) return "";
+    // Parse to integer first to remove trailing .00 from decimal fields
+    const numericPrice = Math.floor(Number(product.price));
+    return numericPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -18,7 +18,7 @@ interface User {
 }
 
 export default function StaffList({ initialStaff }: { initialStaff: User[] }) {
-    const [activeTab, setActiveTab] = useState<'ALL' | 'ADMIN' | 'CASHIER'>('ALL');
+    const [activeTab, setActiveTab] = useState<'ADMIN' | 'CASHIER'>('ADMIN');
     const [searchTerm, setSearchTerm] = useState("");
     const [showForm, setShowForm] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -26,7 +26,7 @@ export default function StaffList({ initialStaff }: { initialStaff: User[] }) {
     const [deleteError, setDeleteError] = useState("");
 
     const filteredStaff = initialStaff.filter((staff) => {
-        const matchesTab = activeTab === 'ALL' || staff.role === activeTab;
+        const matchesTab = staff.role === activeTab;
         const matchesSearch = staff.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             staff.email.toLowerCase().includes(searchTerm.toLowerCase());
         return matchesTab && matchesSearch;
@@ -62,7 +62,6 @@ export default function StaffList({ initialStaff }: { initialStaff: User[] }) {
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white p-1.5 rounded-2xl border border-slate-100 shadow-sm">
                 <div className="flex gap-1 p-0.5 bg-slate-50/50 rounded-xl w-full lg:w-auto">
                     {[
-                        { id: 'ALL', label: 'Staff', icon: Users },
                         { id: 'ADMIN', label: 'Admin', icon: Shield },
                         { id: 'CASHIER', label: 'Kasir', icon: BadgeCheck },
                     ].map((tab) => (
@@ -112,15 +111,19 @@ export default function StaffList({ initialStaff }: { initialStaff: User[] }) {
                             <th className="px-4 py-4 font-medium text-left">NAMA STAFF</th>
                             <th className="px-4 py-4 font-medium text-left">EMAIL / USERNAME</th>
                             <th className="px-4 py-4 font-medium text-center">POSISI</th>
-                            <th className="px-4 py-4 font-medium text-center">SHIFT</th>
-                            <th className="px-4 py-4 font-medium text-center">JAM / CHECK-IN</th>
+                            {activeTab === 'CASHIER' && (
+                                <>
+                                    <th className="px-4 py-4 font-medium text-center">SHIFT</th>
+                                    <th className="px-4 py-4 font-medium text-center">JAM / CHECK-IN</th>
+                                </>
+                            )}
                             <th className="px-6 py-4 text-right font-medium">AKSI</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50">
                         {filteredStaff.length === 0 ? (
                             <tr>
-                                <td colSpan={6} className="px-6 py-12">
+                                <td colSpan={activeTab === 'CASHIER' ? 7 : 5} className="px-6 py-12">
                                     <div className="flex flex-col items-center justify-center gap-2">
                                         <Search className="w-5 h-5 text-slate-200" />
                                         <p className="text-[11px] font-bold text-slate-300">No staff found</p>
@@ -144,39 +147,39 @@ export default function StaffList({ initialStaff }: { initialStaff: User[] }) {
                                             {staff.role === 'ADMIN' ? 'Administrator' : 'Kasir'}
                                         </span>
                                     </td>
-                                    <td className="px-4 py-4 text-center">
-                                        {staff.role === 'CASHIER' ? (
-                                            <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider ${
-                                                staff.shift === 'Pagi' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
-                                                staff.shift === 'Siang' ? 'bg-orange-50 text-orange-600 border border-orange-100' :
-                                                staff.shift === 'Malam' ? 'bg-indigo-50 text-indigo-600 border border-indigo-100' :
-                                                'bg-slate-50 text-slate-400'
-                                            }`}>
-                                                {staff.shift || '-'}
-                                            </span>
-                                        ) : (
-                                            <span className="text-[10px] font-bold text-slate-300">-</span>
-                                        )}
-                                    </td>
-                                    <td className="px-4 py-4 text-center">
-                                        {staff.lastShiftStatus === 'OPEN' ? (
-                                            <div className="flex flex-col items-center gap-0.5">
-                                                <span className="text-[11px] font-black text-slate-900 tabular-nums">
-                                                    {staff.lastShiftStartTime ? new Date(staff.lastShiftStartTime).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-'}
+                                    {activeTab === 'CASHIER' && (
+                                        <>
+                                            <td className="px-4 py-4 text-center">
+                                                <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider ${
+                                                    staff.shift === 'Pagi' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
+                                                    staff.shift === 'Siang' ? 'bg-orange-50 text-orange-600 border border-orange-100' :
+                                                    staff.shift === 'Malam' ? 'bg-indigo-50 text-indigo-600 border border-indigo-100' :
+                                                    'bg-slate-50 text-slate-400'
+                                                }`}>
+                                                    {staff.shift || '-'}
                                                 </span>
-                                                <span className="text-[8px] font-bold text-emerald-500 uppercase tracking-widest">Check-in</span>
-                                            </div>
-                                        ) : staff.lastShiftStatus === 'CLOSED' ? (
-                                            <div className="flex flex-col items-center gap-0.5 opacity-60">
-                                                <span className="text-[11px] font-bold text-slate-500 tabular-nums">
-                                                    {staff.lastShiftEndTime ? new Date(staff.lastShiftEndTime).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-'}
-                                                </span>
-                                                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Checkout</span>
-                                            </div>
-                                        ) : (
-                                            <span className="text-[10px] font-bold text-slate-300">Belum Ada Shift</span>
-                                        )}
-                                    </td>
+                                            </td>
+                                            <td className="px-4 py-4 text-center">
+                                                {staff.lastShiftStatus === 'OPEN' ? (
+                                                    <div className="flex flex-col items-center gap-0.5">
+                                                        <span className="text-[11px] font-black text-slate-900 tabular-nums">
+                                                            {staff.lastShiftStartTime ? new Date(staff.lastShiftStartTime).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-'}
+                                                        </span>
+                                                        <span className="text-[8px] font-bold text-emerald-500 uppercase tracking-widest">Check-in</span>
+                                                    </div>
+                                                ) : staff.lastShiftStatus === 'CLOSED' ? (
+                                                    <div className="flex flex-col items-center gap-0.5 opacity-60">
+                                                        <span className="text-[11px] font-bold text-slate-500 tabular-nums">
+                                                            {staff.lastShiftEndTime ? new Date(staff.lastShiftEndTime).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-'}
+                                                        </span>
+                                                        <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Checkout</span>
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-[10px] font-bold text-slate-300">Belum Ada Shift</span>
+                                                )}
+                                            </td>
+                                        </>
+                                    )}
                                     <td className="px-6 py-4 text-right">
                                         <button 
                                             onClick={() => setDeletingId(staff.id)}

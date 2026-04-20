@@ -67,3 +67,51 @@ export const validatePromoCode = authAction(
     return { success: true, promotion: promo };
   }
 );
+
+export const deletePromotion = authAction(
+    z.object({ id: z.number() }),
+    async (data, ctx) => {
+        if (ctx.role !== "ADMIN") throw new Error("Forbidden");
+
+        const [deleted] = await db
+            .delete(promotions)
+            .where(and(eq(promotions.id, data.id), eq(promotions.tenantId, ctx.tenantId)))
+            .returning();
+
+        if (!deleted) throw new Error("Promotion not found");
+
+        revalidatePath("/admin/promotions");
+        return { success: true };
+    }
+);
+
+export const updatePromotion = authAction(
+    z.object({
+        id: z.number(),
+        code: z.string().min(1),
+        type: z.enum(["PERCENTAGE", "NOMINAL"]),
+        value: z.number().gt(0),
+        minTransaction: z.number().default(0),
+        isActive: z.boolean().default(true),
+    }),
+    async (data, ctx) => {
+        if (ctx.role !== "ADMIN") throw new Error("Forbidden");
+
+        const [updated] = await db
+            .update(promotions)
+            .set({
+                code: data.code.toUpperCase(),
+                type: data.type,
+                value: data.value.toString(),
+                minTransaction: data.minTransaction.toString(),
+                isActive: data.isActive,
+            })
+            .where(and(eq(promotions.id, data.id), eq(promotions.tenantId, ctx.tenantId)))
+            .returning();
+
+        if (!updated) throw new Error("Promotion not found");
+
+        revalidatePath("/admin/promotions");
+        return { success: true, promotion: updated };
+    }
+);

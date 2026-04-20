@@ -132,7 +132,7 @@ export default function TransactionDetail({
                     </div>
 
                     {!showDeleteConfirm ? (
-                         <button
+                        <button
                             onClick={() => setShowDeleteConfirm(true)}
                             disabled={isDeleting}
                             className="w-full py-4 text-[11px] font-bold text-red-400 hover:text-red-600 transition-colors tracking-widest flex items-center justify-center gap-2"
@@ -147,13 +147,13 @@ export default function TransactionDetail({
                                 <span className="text-[10px] font-black uppercase tracking-wider">Confirm Permanent Deletion?</span>
                             </div>
                             <div className="flex w-full gap-2">
-                                <button 
+                                <button
                                     onClick={() => setShowDeleteConfirm(false)}
                                     className="flex-1 py-2 bg-white border border-red-100 text-red-600 text-[10px] font-bold rounded-lg hover:bg-red-50 transition-colors"
                                 >
                                     BATAL
                                 </button>
-                                <button 
+                                <button
                                     onClick={handleDelete}
                                     disabled={isDeleting}
                                     className="flex-1 py-2 bg-red-600 text-white text-[10px] font-bold rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
