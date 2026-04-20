@@ -21,16 +21,16 @@ export default function TransactionList({ initialData }: { initialData: Transact
     const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    useEffect(() => {
-        const filterData = async () => {
-            setIsLoading(true);
-            const res = await getTransactions({ paymentMethod: activeTab, search });
-            if (res.success) {
-                setTransactions(res.data);
-            }
-            setIsLoading(false);
-        };
+    const filterData = async () => {
+        setIsLoading(true);
+        const res = await getTransactions({ paymentMethod: activeTab, search });
+        if (res.success) {
+            setTransactions(res.data);
+        }
+        setIsLoading(false);
+    };
 
+    useEffect(() => {
         const timeoutId = setTimeout(filterData, 300);
         return () => clearTimeout(timeoutId);
     }, [activeTab, search]);
@@ -148,7 +148,10 @@ export default function TransactionList({ initialData }: { initialData: Transact
             {/* Detail Modal */}
             <TransactionDetail 
                 orderId={selectedOrderId} 
-                onClose={() => setSelectedOrderId(null)} 
+                onClose={() => {
+                    setSelectedOrderId(null);
+                    filterData(); // Refresh list
+                }} 
             />
         </div>
     );

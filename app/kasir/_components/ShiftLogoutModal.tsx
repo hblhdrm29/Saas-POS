@@ -73,7 +73,7 @@ export default function ShiftLogoutModal({ activeShift, onClose }: ShiftLogoutMo
                                 <>
                                     <button
                                         onClick={() => setStep("CASH_INPUT")}
-                                        className="w-full flex items-center gap-4 p-4 bg-orange-500 hover:bg-orange-600 text-white rounded-[1.5rem] transition-all group group-active:scale-95"
+                                        className="w-full flex items-center gap-4 p-4 bg-blue-600 hover:bg-blue-700 text-white rounded-[1.5rem] transition-all group group-active:scale-95 shadow-lg shadow-blue-500/10"
                                     >
                                         <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
                                             <Receipt className="w-6 h-6" />
@@ -104,7 +104,7 @@ export default function ShiftLogoutModal({ activeShift, onClose }: ShiftLogoutMo
                                 <button
                                     onClick={handleExitOnly}
                                     disabled={loading}
-                                    className="w-full flex items-center gap-4 p-4 bg-slate-900 hover:bg-slate-800 text-white rounded-[1.5rem] transition-all group group-active:scale-95"
+                                    className="w-full flex items-center gap-4 p-4 bg-blue-600 hover:bg-blue-700 text-white rounded-[1.5rem] transition-all group group-active:scale-95 shadow-lg shadow-blue-500/10"
                                 >
                                     <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center shrink-0">
                                         <LogOut className="w-6 h-6" />
@@ -119,12 +119,12 @@ export default function ShiftLogoutModal({ activeShift, onClose }: ShiftLogoutMo
                         </div>
                     ) : (
                         <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
-                            <div className="bg-orange-50 p-6 rounded-[2rem] border border-orange-100 text-center space-y-3">
+                            <div className="bg-blue-50 p-6 rounded-[2rem] border border-blue-100 text-center space-y-3">
                                 <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto shadow-sm">
-                                    <Coins className="w-8 h-8 text-orange-500" />
+                                    <Coins className="w-8 h-8 text-blue-600" />
                                 </div>
                                 <div>
-                                    <p className="text-orange-600 text-[10px] font-black uppercase tracking-widest">Input Kas Akhir</p>
+                                    <p className="text-blue-600 text-[10px] font-black uppercase tracking-widest">Input Kas Akhir</p>
                                     <p className="text-slate-500 text-[11px] font-medium">Hitung total uang fisik di laci saat ini</p>
                                 </div>
                             </div>
@@ -135,7 +135,7 @@ export default function ShiftLogoutModal({ activeShift, onClose }: ShiftLogoutMo
                                     type="text"
                                     autoFocus
                                     placeholder="0"
-                                    className="w-full pl-14 pr-8 py-5 bg-slate-50 border border-slate-100 rounded-[1.5rem] text-xl font-black text-slate-900 focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-50 transition-all outline-none"
+                                    className="w-full pl-14 pr-8 py-5 bg-slate-50 border border-slate-100 rounded-[1.5rem] text-xl font-black text-slate-900 focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-50 transition-all outline-none"
                                     value={actualCash}
                                     onChange={(e) => setActualCash(formatInputNumber(e.target.value))}
                                 />
@@ -152,7 +152,7 @@ export default function ShiftLogoutModal({ activeShift, onClose }: ShiftLogoutMo
                                 <button
                                     onClick={handleCheckout}
                                     disabled={loading || !actualCash}
-                                    className="flex-[2] py-4 bg-slate-900 text-white text-[12px] font-bold rounded-2xl shadow-lg shadow-slate-200 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                                    className="flex-[2] py-4 bg-blue-600 text-white text-[12px] font-bold rounded-2xl shadow-lg shadow-blue-500/20 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
                                 >
                                     {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Simpan & Tutup"}
                                 </button>

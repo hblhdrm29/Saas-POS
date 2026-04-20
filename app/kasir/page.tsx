@@ -42,6 +42,7 @@ export default async function POSPage() {
     <POSClient 
       initialProducts={serializedProducts}
       initialCategories={allCategories}
+      user={user}
     />
   );
 }

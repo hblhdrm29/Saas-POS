@@ -48,10 +48,12 @@ interface CartItem extends Product {
 
 export default function POSClient({
   initialProducts,
-  initialCategories
+  initialCategories,
+  user
 }: {
   initialProducts: Product[],
-  initialCategories: Category[]
+  initialCategories: Category[],
+  user: any
 }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
@@ -175,7 +177,7 @@ export default function POSClient({
   const totalAmount = subtotal - discountAmount + tax;
 
   const handleOpenShift = async () => {
-    const res = await openShift({});
+    const res = await openShift({ startingCash: 0 });
     if (res.success && res.data.success) {
       setActiveShift({ id: res.data.shiftId });
       setShowShiftModal(false);
@@ -764,22 +766,39 @@ export default function POSClient({
         </div>
       )}
 
-      {/* Shift Guard Modal */}
+      {/* Ultra-Minimalist Shift Guard Modal */}
       {showShiftModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[200] flex items-center justify-center p-6">
-          <div className="bg-white w-full max-w-sm rounded-[3rem] p-10 shadow-2xl animate-in zoom-in-95 duration-300 flex flex-col items-center">
-            <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mb-6">
-              <Banknote className="w-10 h-10 text-blue-600" />
-            </div>
-            <h3 className="text-2xl font-black text-slate-900 mb-2">Buka Shift Kasir</h3>
-            <p className="text-slate-500 text-[10px] font-bold mb-8 text-center px-4 uppercase tracking-[0.2em] opacity-60">Sistem siap menerima transaksi</p>
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[200] flex items-center justify-center p-6">
+          <div className="bg-white w-full max-w-sm rounded-[2.5rem] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-500 border border-slate-100 flex flex-col">
+            <div className="p-10 flex flex-col items-center">
+              <div className="w-20 h-20 bg-blue-50/50 rounded-[2rem] flex items-center justify-center mb-6 relative group">
+                <Clock className="w-10 h-10 text-blue-600 relative z-10" />
+              </div>
+              
+              <div className="text-center mb-10">
+                <h3 className="text-2xl font-bold text-slate-900 mb-2">Selamat Datang</h3>
+                <p className="text-sm font-medium text-slate-500 mb-6 px-4">Siap melayani pelanggan hari ini? Buka shift Anda untuk memulai transaksi.</p>
+                
+                <div className="inline-flex items-center gap-3 px-4 py-2 bg-slate-50 rounded-full border border-slate-100">
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                  <p className="text-[11px] font-bold text-slate-600">{user?.name || "Kasir"}</p>
+                </div>
+              </div>
 
-            <button
-              onClick={handleOpenShift}
-              className="w-full py-5 bg-blue-600 hover:bg-blue-700 text-white rounded-[2rem] font-black text-sm shadow-xl shadow-blue-500/30 transition-all active:scale-95 flex items-center justify-center gap-2"
-            >
-              Mulai Transaksi <ChevronRight className="w-4 h-4" />
-            </button>
+              <button
+                onClick={handleOpenShift}
+                className="w-full py-4.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold text-[13px] shadow-lg shadow-blue-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 group"
+              >
+                <span>Buka Shift Sekarang</span>
+                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </button>
+            </div>
+            
+            <div className="bg-slate-50 px-10 py-5 border-t border-slate-100 text-center">
+               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                 {new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' })}
+               </p>
+            </div>
           </div>
         </div>
       )}

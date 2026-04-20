@@ -243,3 +243,25 @@ export const getTransactionItems = authAction(
         return items;
     }
 );
+
+export const deleteTransaction = authAction(
+    z.object({
+        transactionId: z.number(),
+    }),
+    async (data, ctx) => {
+        // Only Admin usually allowed for archive deletion
+        // Check ctx.user if necessary, but authAction already ensures session
+        
+        await db
+            .delete(transactions)
+            .where(
+                and(
+                    eq(transactions.id, data.transactionId),
+                    eq(transactions.tenantId, ctx.tenantId)
+                )
+            );
+
+        revalidatePath("/admin/transactions");
+        return { success: true };
+    }
+);

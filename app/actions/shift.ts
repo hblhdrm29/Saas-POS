@@ -7,9 +7,11 @@ import { shifts } from "@/db/schema";
 import { eq, and, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
-const openShiftSchema = z.object({});
+const openShiftSchema = z.object({
+  startingCash: z.number().default(0),
+});
 
-export const openShift = authAction(openShiftSchema, async (_, ctx) => {
+export const openShift = authAction(openShiftSchema, async (data, ctx) => {
   // Check if there's already an open shift for this user
   const [existingShift] = await db
     .select()
@@ -32,7 +34,7 @@ export const openShift = authAction(openShiftSchema, async (_, ctx) => {
     .values({
       tenantId: ctx.tenantId,
       userId: ctx.userId,
-      startingCash: "0",
+      startingCash: data.startingCash.toString(),
       status: "OPEN",
     })
     .returning();
