@@ -20,6 +20,10 @@ export default async function UsersPage() {
             lastShiftStartTime: shifts.startTime,
             lastShiftEndTime: shifts.endTime,
             lastShiftStatus: shifts.status,
+            lastShiftId: shifts.id,
+            lastShiftStartingCash: shifts.startingCash,
+            lastShiftTotalSalesCash: shifts.totalSalesCash,
+            lastShiftNotes: shifts.notes,
         })
         .from(users)
         .leftJoin(shifts, eq(shifts.id, 
@@ -43,8 +47,8 @@ export default async function UsersPage() {
         <div className="space-y-4 pb-10">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h1 className="text-xl font-bold text-slate-900 tracking-tight">Manajemen Kasir</h1>
-                    <p className="text-slate-400 text-[11px] font-medium leading-none mt-1">Kelola akses dan perizinan tim kasir Anda</p>
+                    <h1 className="text-xl font-bold text-slate-900 tracking-tight">Manajemen Staff</h1>
+                    <p className="text-slate-400 text-[11px] font-medium leading-none mt-1">Kelola akses dan perizinan staff anda</p>
                 </div>
             </div>
 

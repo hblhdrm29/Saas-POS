@@ -9,7 +9,7 @@ const navItems = [
   { href: "/admin/products", icon: Package, label: "Products" },
   { href: "/admin/promotions", icon: Ticket, label: "Promotions" },
   { href: "/admin/transactions", icon: Receipt, label: "Transaction" },
-  { href: "/admin/users", icon: Users, label: "Kasir" },
+  { href: "/admin/users", icon: Users, label: "Manajemen Staff" },
   { href: "/admin/shifts", icon: History, label: "Laporan Shift" },
 ];
 

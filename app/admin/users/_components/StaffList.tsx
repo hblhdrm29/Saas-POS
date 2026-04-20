@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, Shield, Calendar, MoreVertical, BadgeCheck, Search, Users, UserPlus, Trash2, AlertCircle, Loader2 } from "lucide-react";
 import StaffForm from "./StaffForm";
 import { deleteStaff } from "@/app/actions/staff";
+import AdminShiftEditModal from "../../shifts/_components/AdminShiftEditModal";
+import { Mail, Shield, Calendar, MoreVertical, BadgeCheck, Search, Users, UserPlus, Trash2, AlertCircle, Loader2, Edit3 } from "lucide-react";
 
 interface User {
     id: string;
@@ -15,12 +16,17 @@ interface User {
     lastShiftStatus: string | null;
     lastShiftStartTime: string | null;
     lastShiftEndTime: string | null;
+    lastShiftId: number | null;
+    lastShiftStartingCash: string | null;
+    lastShiftTotalSalesCash: string | null;
+    lastShiftNotes: string | null;
 }
 
 export default function StaffList({ initialStaff }: { initialStaff: User[] }) {
     const [activeTab, setActiveTab] = useState<'ADMIN' | 'CASHIER'>('ADMIN');
     const [searchTerm, setSearchTerm] = useState("");
     const [showForm, setShowForm] = useState(false);
+    const [editingStaff, setEditingStaff] = useState<User | null>(null);
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const [deleteError, setDeleteError] = useState("");
@@ -95,20 +101,24 @@ export default function StaffList({ initialStaff }: { initialStaff: User[] }) {
                         className="flex items-center gap-2 px-4 py-1.5 bg-[#0066FF] text-white rounded-lg text-[11px] font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/10 active:scale-95 whitespace-nowrap"
                     >
                         <UserPlus className="w-3.5 h-3.5" />
-                        <span>Tambah Kasir</span>
+                        <span>Tambah Staff</span>
                     </button>
                 </div>
             </div>
 
             {showForm && <StaffForm onClose={() => setShowForm(false)} />}
-
-            {/* Table */}
+            {editingStaff && (
+                <StaffForm 
+                    initialData={editingStaff} 
+                    onClose={() => setEditingStaff(null)} 
+                />
+            )}
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
                 <table className="w-full text-left border-collapse">
                     <thead>
                         <tr className="bg-slate-50/50 text-slate-400 text-[10px] font-bold tracking-wider border-b border-slate-100/80">
                             <th className="px-6 py-4 w-12 font-medium text-center">#</th>
-                            <th className="px-4 py-4 font-medium text-left">NAMA KASIR</th>
+                            <th className="px-4 py-4 font-medium text-left">NAMA ADMIN</th>
                             <th className="px-4 py-4 font-medium text-left">EMAIL / USERNAME</th>
                             <th className="px-4 py-4 font-medium text-center">POSISI</th>
                             {activeTab === 'CASHIER' && (
@@ -180,7 +190,14 @@ export default function StaffList({ initialStaff }: { initialStaff: User[] }) {
                                             </td>
                                         </>
                                     )}
-                                    <td className="px-6 py-4 text-right">
+                                    <td className="px-6 py-4 text-right flex justify-end items-center gap-2">
+                                        <button
+                                            onClick={() => setEditingStaff(staff)}
+                                            className="p-1.5 rounded-lg transition-all text-blue-600 bg-blue-50 border border-blue-100 hover:bg-blue-100"
+                                            title="Ubah Detail Kasir"
+                                        >
+                                            <Edit3 className="w-4 h-4" />
+                                        </button>
                                         <button 
                                             onClick={() => setDeletingId(staff.id)}
                                             className="p-1.5 text-slate-200 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"

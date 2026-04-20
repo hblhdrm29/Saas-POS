@@ -71,13 +71,7 @@ export default function TransactionList({ initialData }: { initialData: Transact
             {/* Minimalist Filters Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-2">
                 <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-2">
-                        <h2 className="text-sm font-bold text-slate-900 border-b-2 border-slate-900 pb-1">Active Transactions</h2>
-                        <div className="flex items-center gap-1.5 px-2 py-0.5 bg-emerald-50 rounded-full border border-emerald-100 mb-1">
-                            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-                            <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest">Live</span>
-                        </div>
-                    </div>
+                    <h2 className="text-sm font-bold text-slate-900 border-b-2 border-slate-900 pb-1">Active Transactions</h2>
                     <div className="h-4 w-[1px] bg-slate-200" />
                     <div className="relative group max-w-xs w-full">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />

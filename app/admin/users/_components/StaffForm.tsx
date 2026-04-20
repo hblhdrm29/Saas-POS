@@ -1,25 +1,33 @@
 "use client";
 
-import { useState } from "react";
-import { X, Loader2, UserPlus, Shield, BadgeCheck, Lock, Mail, User } from "lucide-react";
-import { createStaff } from "@/app/actions/staff";
+import { useState, useEffect } from "react";
+import { X, Loader2, UserPlus, Shield, BadgeCheck, Lock, Mail, User, Save } from "lucide-react";
+import { createStaff, updateStaff } from "@/app/actions/staff";
 import { useRouter } from "next/navigation";
 
 interface StaffFormProps {
     onClose: () => void;
+    initialData?: {
+        id: string;
+        name: string | null;
+        email: string;
+        role: string;
+        shift: string | null;
+    };
 }
 
-export default function StaffForm({ onClose }: StaffFormProps) {
+export default function StaffForm({ onClose, initialData }: StaffFormProps) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const router = useRouter();
+    const isEdit = !!initialData;
 
     const [formData, setFormData] = useState({
-        name: "",
-        email: "",
+        name: initialData?.name || "",
+        email: initialData?.email || "",
         password: "",
-        role: "CASHIER" as "ADMIN" | "CASHIER",
-        shift: "",
+        role: (initialData?.role as "ADMIN" | "CASHIER") || "CASHIER",
+        shift: initialData?.shift || "",
     });
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -28,12 +36,15 @@ export default function StaffForm({ onClose }: StaffFormProps) {
         setError("");
 
         try {
-            const res = await createStaff(formData);
+            const res = isEdit 
+                ? await updateStaff({ ...formData, id: initialData.id })
+                : await createStaff(formData);
+
             if (res.success) {
                 router.refresh();
                 onClose();
             } else {
-                setError(res.error || "Gagal menambahkan.");
+                setError(res.error || `Gagal ${isEdit ? 'memperbarui' : 'menambahkan'}.`);
             }
         } catch (err: any) {
             setError(err.message || "Terjadi kesalahan sistem.");
@@ -47,8 +58,10 @@ export default function StaffForm({ onClose }: StaffFormProps) {
             <div className="bg-white w-full max-w-md rounded-[2.5rem] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 border border-slate-100">
                 <div className="p-6 border-b border-slate-50 flex items-center justify-between bg-slate-50/20">
                     <div>
-                        <h3 className="text-lg font-bold text-slate-900 tracking-tight">Tambah</h3>
-                        <p className="text-slate-400 text-[10px] font-medium leading-none mt-1">Isi detail akun untuk anggota tim baru</p>
+                        <h3 className="text-lg font-bold text-slate-900 tracking-tight">{isEdit ? 'Ubah Detail' : 'Tambah'}</h3>
+                        <p className="text-slate-400 text-[10px] font-medium leading-none mt-1">
+                            {isEdit ? 'Perbarui informasi anggota tim Anda' : 'Isi detail akun untuk anggota tim baru'}
+                        </p>
                     </div>
                     <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-lg transition-all active:scale-95 text-slate-300">
                         <X className="w-4 h-4" />
@@ -100,13 +113,13 @@ export default function StaffForm({ onClose }: StaffFormProps) {
                     </div>
 
                     <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-slate-400 ml-1">Password</label>
+                        <label className="text-[10px] font-bold text-slate-400 ml-1">Password {isEdit && '(Opsional)'}</label>
                         <input
                             type="password"
-                            required
+                            required={!isEdit}
                             minLength={4}
                             autoComplete="new-password"
-                            placeholder="Isi password"
+                            placeholder={isEdit ? "Kosongkan jika tidak ingin diubah" : "Isi password"}
                             className="w-full px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-[12px] font-bold outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all placeholder:text-slate-300"
                             value={formData.password}
                             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
@@ -156,7 +169,7 @@ export default function StaffForm({ onClose }: StaffFormProps) {
                         </div>
                     </div>
 
-                    {/* Shift Selection for Cashier */}
+                    {/* Shift Selection: Only visible for CASHIER role as requested */}
                     {formData.role === "CASHIER" && (
                         <div className="space-y-1.5 animate-in fade-in slide-in-from-top-2 duration-500">
                             <label className="text-[10px] font-bold text-slate-400 ml-1">Pilih Jadwal Shift</label>
@@ -194,8 +207,8 @@ export default function StaffForm({ onClose }: StaffFormProps) {
                                 <Loader2 className="w-4 h-4 animate-spin" />
                             ) : (
                                 <>
-                                    <UserPlus className="w-3.5 h-3.5" />
-                                    Simpan
+                                    {isEdit ? <Save className="w-3.5 h-3.5" /> : <UserPlus className="w-3.5 h-3.5" />}
+                                    {isEdit ? 'Simpan Perubahan' : 'Simpan'}
                                 </>
                             )}
                         </button>

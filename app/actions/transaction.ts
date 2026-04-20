@@ -27,13 +27,27 @@ const checkoutSchema = z.object({
 
 export const processCheckout = authAction(checkoutSchema, async (data, ctx) => {
   return await db.transaction(async (tx) => {
+    // 0. Determine attribution (Shift Owner vs Current User)
+    let attributionUserId = ctx.userId;
+    if (data.shiftId) {
+        const [shift] = await tx
+            .select({ userId: shifts.userId })
+            .from(shifts)
+            .where(eq(shifts.id, data.shiftId))
+            .limit(1);
+        
+        if (shift) {
+            attributionUserId = shift.userId;
+        }
+    }
+
     // 1. Create Transaction header
     const [newTransaction] = await tx
       .insert(transactions)
       .values({
         id: data.orderId || undefined,
         tenantId: ctx.tenantId,
-        userId: ctx.userId,
+        userId: attributionUserId,
         shiftId: data.shiftId,
         subtotal: data.subtotal.toString(),
         discountAmount: data.discountAmount.toString(),

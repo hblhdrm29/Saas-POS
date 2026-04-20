@@ -45,7 +45,7 @@ export const openShift = authAction(openShiftSchema, async (data, ctx) => {
 
 const closeShiftSchema = z.object({
   shiftId: z.number(),
-  actualCash: z.number(),
+  actualCash: z.number().optional(),
   notes: z.string().optional(),
 });
 
@@ -66,11 +66,16 @@ export const closeShift = authAction(closeShiftSchema, async (data, ctx) => {
     throw new Error("Shift not found or already closed.");
   }
 
+  // Calculate actualCash if not provided (Automated Mode)
+  const finalActualCash = data.actualCash !== undefined 
+    ? data.actualCash 
+    : Math.round(Number(shift.startingCash || 0) + Number(shift.totalSalesCash || 0));
+
   await db
     .update(shifts)
     .set({
       endTime: new Date(),
-      actualCash: data.actualCash.toString(),
+      actualCash: finalActualCash.toString(),
       notes: data.notes,
       status: "CLOSED",
     })
@@ -95,4 +100,40 @@ export const getActiveShift = authAction(z.object({}), async (_, ctx) => {
     .limit(1);
 
   return shift || null;
+});
+
+const updateShiftAdminSchema = z.object({
+  shiftId: z.number(),
+  startingCash: z.number().optional(),
+  actualCash: z.number().optional(),
+  notes: z.string().optional(),
+  status: z.enum(["OPEN", "CLOSED"]).optional(),
+});
+
+export const updateShiftAdmin = authAction(updateShiftAdminSchema, async (data, ctx) => {
+  const updateData: any = {};
+  if (data.startingCash !== undefined) updateData.startingCash = data.startingCash.toString();
+  if (data.actualCash !== undefined) updateData.actualCash = data.actualCash.toString();
+  if (data.notes !== undefined) updateData.notes = data.notes;
+  if (data.status !== undefined) {
+    updateData.status = data.status;
+    if (data.status === "CLOSED") {
+      updateData.endTime = new Date();
+    }
+  }
+
+  await db
+    .update(shifts)
+    .set(updateData)
+    .where(
+      and(
+        eq(shifts.id, data.shiftId),
+        eq(shifts.tenantId, ctx.tenantId)
+      )
+    );
+
+  revalidatePath("/kasir");
+  revalidatePath("/admin/shifts");
+  revalidatePath("/admin/users");
+  return { success: true };
 });

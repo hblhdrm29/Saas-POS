@@ -13,6 +13,9 @@ interface ShiftLogoutModalProps {
 export default function ShiftLogoutModal({ activeShift, onClose }: ShiftLogoutModalProps) {
     const [step, setStep] = useState<"SELECT" | "CASH_INPUT">("SELECT");
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState(false);
+    const [finalTotal, setFinalTotal] = useState(0);
     const [actualCash, setActualCash] = useState("");
 
     const handleExitOnly = async () => {
@@ -21,24 +24,32 @@ export default function ShiftLogoutModal({ activeShift, onClose }: ShiftLogoutMo
     };
 
     const handleCheckout = async () => {
-        if (!actualCash) return;
         setLoading(true);
-        const amount = Number(actualCash.replace(/\./g, ""));
-        
+        setError(null);
+
         try {
+            const amount = Math.round(Number(activeShift?.startingCash || 0) + Number(activeShift?.totalSalesCash || 0));
+            setFinalTotal(amount);
+
             const res = await closeShift({
                 shiftId: activeShift.id,
-                actualCash: amount,
+                // actualCash omitted to trigger server-side automated calculation
             });
 
-            if (res?.success) {
-                await signOut({ callbackUrl: "/login" });
+            if (res && 'data' in res && res.data?.success) {
+                setSuccess(true);
+                // Wait 2 seconds then sign out
+                setTimeout(async () => {
+                    await signOut({ callbackUrl: "/login" });
+                }, 2000);
             } else {
-                alert("Gagal menutup shift. Silakan coba lagi.");
+                const errorMessage = (res as any)?.serverError || (res as any)?.validationErrors?._errors?.[0] || (res as any)?.error || "Gagal menutup shift. Silakan coba lagi.";
+                setError(errorMessage);
                 setLoading(false);
             }
-        } catch (err) {
-            console.error(err);
+        } catch (err: any) {
+            console.error("Shift checkout error:", err);
+            setError(err.message || "Terjadi kesalahan sistem saat menutup shift.");
             setLoading(false);
         }
     };
@@ -57,8 +68,8 @@ export default function ShiftLogoutModal({ activeShift, onClose }: ShiftLogoutMo
                         <h3 className="text-lg font-bold text-slate-900 tracking-tight">Konfirmasi Keluar</h3>
                         <p className="text-slate-400 text-[10px] font-medium leading-none mt-1 uppercase tracking-wider">Session Management</p>
                     </div>
-                    <button 
-                        onClick={onClose} 
+                    <button
+                        onClick={onClose}
                         disabled={loading}
                         className="p-2 hover:bg-slate-50 rounded-xl transition-all active:scale-95 text-slate-300 hover:text-slate-900"
                     >
@@ -67,7 +78,24 @@ export default function ShiftLogoutModal({ activeShift, onClose }: ShiftLogoutMo
                 </div>
 
                 <div className="p-8">
-                    {step === "SELECT" ? (
+                    {success ? (
+                        <div className="space-y-6 animate-in zoom-in-95 duration-500 text-center py-4">
+                            <div className="w-24 h-24 bg-green-50 rounded-[2.5rem] flex items-center justify-center mx-auto shadow-xl shadow-green-500/10 border-4 border-white ring-1 ring-green-100">
+                                <Coins className="w-10 h-10 text-green-500 animate-bounce" />
+                            </div>
+                            <div className="space-y-2">
+                                <h4 className="text-xl font-black text-slate-900 tracking-tight">Shift Berhasil Ditutup!</h4>
+                                <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-full border border-slate-100">
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Tersimpan</p>
+                                    <p className="text-sm font-black text-slate-900">Rp {formatInputNumber(finalTotal.toString())}</p>
+                                </div>
+                            </div>
+                            <p className="text-[11px] text-slate-400 font-medium">Anda akan dialihkan ke layar login dalam beberapa saat...</p>
+                            <div className="w-12 h-1 bg-slate-100 rounded-full mx-auto relative overflow-hidden">
+                                <div className="absolute inset-y-0 left-0 bg-green-500 w-full animate-progress-shrink origin-left" />
+                            </div>
+                        </div>
+                    ) : step === "SELECT" ? (
                         <div className="space-y-4">
                             {activeShift ? (
                                 <>
@@ -119,6 +147,12 @@ export default function ShiftLogoutModal({ activeShift, onClose }: ShiftLogoutMo
                         </div>
                     ) : (
                         <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
+                            {error && (
+                                <div className="p-3 bg-red-50 border border-red-100 rounded-xl text-red-600 text-[11px] font-bold flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+                                    {error}
+                                </div>
+                            )}
                             <div className="bg-blue-50 p-6 rounded-[2rem] border border-blue-100 text-center space-y-3">
                                 <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto shadow-sm">
                                     <Coins className="w-8 h-8 text-blue-600" />
@@ -133,12 +167,14 @@ export default function ShiftLogoutModal({ activeShift, onClose }: ShiftLogoutMo
                                 <span className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">Rp</span>
                                 <input
                                     type="text"
-                                    autoFocus
+                                    readOnly
                                     placeholder="0"
-                                    className="w-full pl-14 pr-8 py-5 bg-slate-50 border border-slate-100 rounded-[1.5rem] text-xl font-black text-slate-900 focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-50 transition-all outline-none"
-                                    value={actualCash}
-                                    onChange={(e) => setActualCash(formatInputNumber(e.target.value))}
+                                    className="w-full pl-14 pr-8 py-5 bg-slate-100 border border-slate-100 rounded-[1.5rem] text-xl font-black text-slate-900 outline-none cursor-not-allowed"
+                                    value={activeShift ? formatInputNumber(Math.round(Number(activeShift.startingCash || 0) + Number(activeShift.totalSalesCash || 0)).toString()) : "0"}
                                 />
+                                <p className="text-[10px] text-center text-slate-400 font-bold mt-3 animate-pulse italic">
+                                    Sistem telah menghitung total penjualan otomatis
+                                </p>
                             </div>
 
                             <div className="flex gap-3">
@@ -151,7 +187,7 @@ export default function ShiftLogoutModal({ activeShift, onClose }: ShiftLogoutMo
                                 </button>
                                 <button
                                     onClick={handleCheckout}
-                                    disabled={loading || !actualCash}
+                                    disabled={loading}
                                     className="flex-[2] py-4 bg-blue-600 text-white text-[12px] font-bold rounded-2xl shadow-lg shadow-blue-500/20 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
                                 >
                                     {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Simpan & Tutup"}
@@ -160,7 +196,7 @@ export default function ShiftLogoutModal({ activeShift, onClose }: ShiftLogoutMo
                         </div>
                     )}
                 </div>
-                
+
                 {/* Safety hint */}
                 <div className="p-4 bg-slate-50/50 border-t border-slate-50 text-center">
                     <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">

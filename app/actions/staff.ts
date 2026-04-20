@@ -4,15 +4,16 @@ import { z } from "zod";
 import { authAction } from "@/lib/safe-action";
 import { db } from "@/db";
 import { users } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 const staffSchema = z.object({
-    name: z.string().min(2, "Name is too short"),
-    email: z.string().email("Invalid email address"),
-    password: z.string().min(4, "Password must be at least 4 characters"),
-    role: z.enum(["ADMIN", "CASHIER"]),
-    shift: z.string().optional(),
+  id: z.string().optional(),
+  name: z.string().min(2, "Name is too short"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().optional(),
+  role: z.enum(["ADMIN", "CASHIER"]),
+  shift: z.string().optional(),
 });
 
 export const createStaff = authAction(staffSchema, async (data, ctx) => {
@@ -38,17 +39,55 @@ export const createStaff = authAction(staffSchema, async (data, ctx) => {
         await db.insert(users).values({
             name: data.name,
             email: data.email,
-            passwordHash: data.password,
+            passwordHash: data.password || "123456",
             role: data.role,
             shift: data.shift,
             tenantId: ctx.tenantId,
         });
 
-        revalidatePath("/admin/users");
-        return { success: true };
-    } catch (error: any) {
-        throw new Error(error.message || "Failed to create staff member.");
+    revalidatePath("/admin/users");
+    return { success: true };
+  } catch (error: any) {
+    throw new Error(error.message || "Failed to create staff member.");
+  }
+});
+
+export const updateStaff = authAction(staffSchema, async (data, ctx) => {
+  if (ctx.role !== "ADMIN") {
+    throw new Error("Only administrators can update staff.");
+  }
+
+  if (!data.id) {
+    throw new Error("Staff ID is required for update.");
+  }
+
+  try {
+    const updateData: any = {
+      name: data.name,
+      email: data.email,
+      role: data.role,
+      shift: data.shift,
+    };
+
+    if (data.password) {
+      updateData.passwordHash = data.password;
     }
+
+    await db
+      .update(users)
+      .set(updateData)
+      .where(
+        and(
+          eq(users.id, data.id),
+          eq(users.tenantId, ctx.tenantId)
+        )
+      );
+
+    revalidatePath("/admin/users");
+    return { success: true };
+  } catch (error: any) {
+    throw new Error(error.message || "Failed to update staff member.");
+  }
 });
 
 export const deleteStaff = authAction(z.object({ id: z.string() }), async (data, ctx) => {
