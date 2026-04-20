@@ -41,7 +41,7 @@ export default function StaffList({ initialStaff }: { initialStaff: User[] }) {
             if (res.success) {
                 setDeletingId(null);
             } else {
-                setDeleteError(res.error || "Gagal menghapus staff.");
+                setDeleteError(res.error || "Gagal menghapus kasir.");
             }
         } catch (err: any) {
             setDeleteError(err.message || "Terjadi kesalahan sistem.");
@@ -95,7 +95,7 @@ export default function StaffList({ initialStaff }: { initialStaff: User[] }) {
                         className="flex items-center gap-2 px-4 py-1.5 bg-[#0066FF] text-white rounded-lg text-[11px] font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/10 active:scale-95 whitespace-nowrap"
                     >
                         <UserPlus className="w-3.5 h-3.5" />
-                        <span>Tambah Staff</span>
+                        <span>Tambah Kasir</span>
                     </button>
                 </div>
             </div>
@@ -108,7 +108,7 @@ export default function StaffList({ initialStaff }: { initialStaff: User[] }) {
                     <thead>
                         <tr className="bg-slate-50/50 text-slate-400 text-[10px] font-bold tracking-wider border-b border-slate-100/80">
                             <th className="px-6 py-4 w-12 font-medium text-center">#</th>
-                            <th className="px-4 py-4 font-medium text-left">NAMA STAFF</th>
+                            <th className="px-4 py-4 font-medium text-left">NAMA KASIR</th>
                             <th className="px-4 py-4 font-medium text-left">EMAIL / USERNAME</th>
                             <th className="px-4 py-4 font-medium text-center">POSISI</th>
                             {activeTab === 'CASHIER' && (
@@ -126,7 +126,7 @@ export default function StaffList({ initialStaff }: { initialStaff: User[] }) {
                                 <td colSpan={activeTab === 'CASHIER' ? 7 : 5} className="px-6 py-12">
                                     <div className="flex flex-col items-center justify-center gap-2">
                                         <Search className="w-5 h-5 text-slate-200" />
-                                        <p className="text-[11px] font-bold text-slate-300">No staff found</p>
+                                        <p className="text-[11px] font-bold text-slate-300">No kasir found</p>
                                     </div>
                                 </td>
                             </tr>
@@ -184,7 +184,7 @@ export default function StaffList({ initialStaff }: { initialStaff: User[] }) {
                                         <button 
                                             onClick={() => setDeletingId(staff.id)}
                                             className="p-1.5 text-slate-200 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                                            title="Hapus Staff"
+                                            title="Hapus Kasir"
                                         >
                                             <Trash2 className="w-4 h-4" />
                                         </button>
@@ -206,8 +206,8 @@ export default function StaffList({ initialStaff }: { initialStaff: User[] }) {
                             </div>
                             
                             <div>
-                                <h4 className="text-[15px] font-bold text-slate-900">Hapus Staff?</h4>
-                                <p className="text-[11px] text-slate-500 mt-1 px-2">Data staff yang dihapus tidak dapat dikembalikan lagi.</p>
+                                <h4 className="text-[15px] font-bold text-slate-900">Hapus Kasir?</h4>
+                                <p className="text-[11px] text-slate-500 mt-1 px-2">Data kasir yang dihapus tidak dapat dikembalikan lagi.</p>
                             </div>
 
                             {deleteError && (

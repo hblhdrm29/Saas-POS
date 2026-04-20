@@ -28,7 +28,7 @@ export default function RootLayout({
   return (
     <html
       lang="id"
-      className={cn("h-full", "antialiased", inter.variable, plusJakartaSans.variable, "font-sans", geist.variable)}
+      className={cn("h-full", "antialiased", inter.variable, plusJakartaSans.variable, geist.variable, "font-sans")}
     >
       <body className="min-h-full flex flex-col font-sans">{children}</body>
     </html>

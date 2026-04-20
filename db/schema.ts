@@ -23,20 +23,6 @@ export const users = pgTable("users", {
 });
 
 
-// Promotions & Vouchers
-export const promotions = pgTable("promotions", {
-  id: serial("id").primaryKey(),
-  tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }).notNull(),
-  code: varchar("code", { length: 100 }).notNull(), // e.g. 'DISKON10'
-  type: varchar("type", { length: 50 }).notNull(), // 'PERCENTAGE', 'NOMINAL'
-  value: decimal("value", { precision: 12, scale: 2 }).notNull(),
-  minTransaction: decimal("min_transaction", { precision: 12, scale: 2 }).default("0").notNull(),
-  startDate: timestamp("start_date").defaultNow(),
-  endDate: timestamp("end_date"),
-  isActive: boolean("is_active").default(true).notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
-
 // Shifts & Cash Control
 export const shifts = pgTable("shifts", {
   id: serial("id").primaryKey(),
@@ -84,7 +70,6 @@ export const transactions = pgTable("transactions", {
   id: serial("id").primaryKey(),
   tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }).notNull(),
   userId: uuid("user_id").references(() => users.id, { onDelete: "set null" }),
-  promotionId: integer("promotion_id").references(() => promotions.id, { onDelete: "set null" }),
   shiftId: integer("shift_id").references(() => shifts.id, { onDelete: "set null" }),
   subtotal: decimal("subtotal", { precision: 12, scale: 2 }).notNull(),
   discountAmount: decimal("discount_amount", { precision: 12, scale: 2 }).default("0").notNull(),
@@ -162,4 +147,26 @@ export const voidLogs = pgTable("void_logs", {
   reason: text("reason").notNull(),
   userId: uuid("user_id").references(() => users.id, { onDelete: "set null" }).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Promotions / Vouchers
+export const promotions = pgTable("promotions", {
+  id: serial("id").primaryKey(),
+  tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "cascade" }).notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  code: varchar("code", { length: 100 }).notNull(),
+  type: varchar("type", { length: 50 }).notNull(), // 'Persen', 'Nominal'
+  value: decimal("value", { precision: 12, scale: 2 }).notNull(),
+  minOrder: decimal("min_order", { precision: 12, scale: 2 }).default("0").notNull(),
+  maxDiscount: decimal("max_discount", { precision: 12, scale: 2 }),
+  quota: integer("quota").notNull(),
+  used: integer("used").default(0).notNull(),
+  expiry: timestamp("expiry").notNull(),
+  active: boolean("active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => {
+  return {
+    codeTenantIdx: uniqueIndex("promo_code_tenant_idx").on(table.tenantId, table.code),
+  }
 });

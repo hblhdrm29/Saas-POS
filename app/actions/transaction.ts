@@ -3,13 +3,13 @@
 import { z } from "zod";
 import { authAction } from "@/lib/safe-action";
 import { db } from "@/db";
-import { transactions, transactionItems, products, shifts, stockLogs, voidLogs, users } from "@/db/schema";
+import { transactions, transactionItems, products, shifts, stockLogs, voidLogs, users, parkedOrders } from "@/db/schema";
 import { eq, and, sql, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 const checkoutSchema = z.object({
+  orderId: z.number().optional().nullable(),
   paymentMethod: z.string(),
-  promotionId: z.number().optional().nullable(),
   shiftId: z.number().optional().nullable(),
   items: z.array(
     z.object({
@@ -31,9 +31,9 @@ export const processCheckout = authAction(checkoutSchema, async (data, ctx) => {
     const [newTransaction] = await tx
       .insert(transactions)
       .values({
+        id: data.orderId || undefined,
         tenantId: ctx.tenantId,
         userId: ctx.userId,
-        promotionId: data.promotionId,
         shiftId: data.shiftId,
         subtotal: data.subtotal.toString(),
         discountAmount: data.discountAmount.toString(),
@@ -43,6 +43,14 @@ export const processCheckout = authAction(checkoutSchema, async (data, ctx) => {
         status: "COMPLETED",
       })
       .returning();
+
+    // 1b. If it was a parked order, delete it and recalibrate sequence
+    if (data.orderId) {
+        await tx.delete(parkedOrders).where(eq(parkedOrders.id, data.orderId));
+        
+        // Recalibrate sequence to avoid serial conflicts
+        await tx.execute(sql`SELECT setval('transactions_id_seq', (SELECT MAX(id) FROM transactions))`);
+    }
 
     // 2. Process Line Items and Update Stock
     for (const item of data.items) {
@@ -193,6 +201,7 @@ export const getTransactions = authAction(
                 status: transactions.status,
                 createdAt: transactions.createdAt,
                 staffName: users.name,
+                staffRole: users.role,
             })
             .from(transactions)
             .leftJoin(users, eq(transactions.userId, users.id))

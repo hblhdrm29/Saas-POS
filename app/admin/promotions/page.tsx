@@ -1,18 +1,22 @@
-import { db } from "@/db";
-import { promotions } from "@/db/schema";
 import { auth } from "@/auth";
-import { eq, desc } from "drizzle-orm";
-import PromotionManager from "./_components/PromotionManager";
+import { redirect } from "next/navigation";
+import { getPromotions } from "@/app/actions/promotion_actions";
+import PromotionsClient from "./_components/PromotionsClient";
 
 export default async function PromotionsPage() {
-    const session = await auth();
-    const user = session?.user as any;
+  const session = await auth();
+  const user = session?.user as any;
 
-    const initialPromotions = await db
-        .select()
-        .from(promotions)
-        .where(eq(promotions.tenantId, user.tenantId))
-        .orderBy(desc(promotions.createdAt));
+  if (!user || user.role !== "ADMIN") {
+    redirect("/login");
+  }
 
-    return <PromotionManager initialPromotions={initialPromotions} />;
+  // Fetch real data from database
+  const initialVouchers = await getPromotions();
+
+  return (
+    <div className="space-y-8">
+      <PromotionsClient initialData={initialVouchers as any} />
+    </div>
+  );
 }

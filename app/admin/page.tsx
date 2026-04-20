@@ -49,9 +49,6 @@ export default async function AdminDashboard() {
                   <div className="w-10 h-10 bg-blue-50 text-[#0066FF] rounded-lg flex items-center justify-center">
                      <CreditCard className="w-5 h-5" />
                   </div>
-                  <div className="flex items-center text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full text-[10px] font-bold">
-                     +12.5%
-                  </div>
                </div>
                <div>
                   <p className="text-[11px] font-bold text-slate-400 tracking-tight uppercase">Total Revenue</p>
@@ -63,9 +60,6 @@ export default async function AdminDashboard() {
                <div className="flex justify-between items-start">
                   <div className="w-10 h-10 bg-orange-50 text-orange-600 rounded-lg flex items-center justify-center">
                      <ShoppingCart className="w-5 h-5" />
-                  </div>
-                  <div className="flex items-center text-red-500 bg-red-50 px-2 py-0.5 rounded-full text-[10px] font-bold">
-                     -2.1%
                   </div>
                </div>
                <div>

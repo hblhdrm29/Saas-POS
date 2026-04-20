@@ -15,6 +15,13 @@
       "when": 1776314337670,
       "tag": "0001_wet_ultimates",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1776652825595,
+      "tag": "0002_steady_abomination",
+      "breakpoints": true
     }
   ]
 }

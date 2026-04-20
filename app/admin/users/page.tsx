@@ -43,8 +43,8 @@ export default async function UsersPage() {
         <div className="space-y-4 pb-10">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h1 className="text-xl font-bold text-slate-900 tracking-tight">Staff Management</h1>
-                    <p className="text-slate-400 text-[11px] font-medium leading-none mt-1">Kelola akses dan perizinan tim Anda</p>
+                    <h1 className="text-xl font-bold text-slate-900 tracking-tight">Manajemen Kasir</h1>
+                    <p className="text-slate-400 text-[11px] font-medium leading-none mt-1">Kelola akses dan perizinan tim kasir Anda</p>
                 </div>
             </div>
 

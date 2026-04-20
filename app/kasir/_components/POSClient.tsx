@@ -21,7 +21,6 @@ import {
 } from "lucide-react";
 import { processCheckout } from "@/app/actions/transaction";
 import { openShift, getActiveShift, closeShift } from "@/app/actions/shift";
-import { validatePromoCode } from "@/app/actions/promotion";
 import { parkOrder, getParkedOrders, recallParkedOrder, deleteParkedOrder } from "@/app/actions/parked-order";
 
 import logoBlueiy from "../../assets/logo/blueiy_premium.png";
@@ -72,12 +71,9 @@ export default function POSClient({
   const [activeShift, setActiveShift] = useState<any>(null);
   const [showShiftModal, setShowShiftModal] = useState(false);
 
-  const [promoCode, setPromoCode] = useState("");
-  const [appliedPromo, setAppliedPromo] = useState<any>(null);
-  const [promoError, setPromoError] = useState("");
-
   const [parkedOrdersList, setParkedOrdersList] = useState<any[]>([]);
   const [showRecallModal, setShowRecallModal] = useState(false);
+  const [recalledOrderId, setRecalledOrderId] = useState<number | null>(null);
 
   // Persistence: Load from LocalStorage on mount
   useEffect(() => {
@@ -165,13 +161,7 @@ export default function POSClient({
   const subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
   // Calculate Discounts
-  const discountAmount = useMemo(() => {
-    if (!appliedPromo) return 0;
-    if (appliedPromo.type === "PERCENTAGE") {
-      return (subtotal * Number(appliedPromo.value)) / 100;
-    }
-    return Number(appliedPromo.value);
-  }, [subtotal, appliedPromo]);
+  const discountAmount = 0;
 
   const tax = (subtotal - discountAmount) * 0.04;
   const totalAmount = subtotal - discountAmount + tax;
@@ -186,29 +176,29 @@ export default function POSClient({
     }
   };
 
-  const handleApplyPromo = async () => {
-    setPromoError("");
-    const res = await validatePromoCode({ code: promoCode, subtotal });
-    if (res.success && res.data.success && res.data.promotion) {
-      setAppliedPromo(res.data.promotion);
-    } else {
-      setPromoError(res.success ? (res.data.error || "Invalid promo code") : res.error);
-      setAppliedPromo(null);
-    }
-  };
 
 
   const handleParkOrder = async () => {
-    if (cart.length === 0) return;
+    if (cart.length === 0 || isProcessing) return;
+    const customerName = prompt("Nama Pelanggan (opsional):");
+    
+    setIsProcessing(true);
     const res = await parkOrder({
-      customerName: "Order",
-      items: cart.map(i => ({ id: i.id, quantity: i.quantity, price: i.price })),
-      totalAmount: totalAmount
+      items: cart.map(item => ({
+        id: item.id,
+        quantity: item.quantity,
+        price: item.price
+      })),
+      totalAmount: subtotal,
+      customerName: customerName || undefined
     });
-    if (res.success && res.data.success) {
+
+    setIsProcessing(false);
+    if (res.success) {
       setCart([]);
-      setAppliedPromo(null);
-      // Refresh list
+      setRecalledOrderId(null);
+      localStorage.removeItem("pos_cart");
+// Refresh list
       const parked = await getParkedOrders({});
       if (parked.success && parked.data) setParkedOrdersList(parked.data);
     } else {
@@ -230,6 +220,7 @@ export default function POSClient({
       }).filter(Boolean) as CartItem[];
 
       setCart(recalledItems);
+      setRecalledOrderId(id);
       setShowRecallModal(false);
       // Refresh list
       const parked = await getParkedOrders({});
@@ -259,8 +250,8 @@ export default function POSClient({
     
     try {
       const result = await processCheckout({
+        orderId: recalledOrderId,
         paymentMethod,
-        promotionId: appliedPromo?.id || null,
         shiftId: activeShift.id,
         items: cart.map(item => ({
           id: item.id,
@@ -279,8 +270,7 @@ export default function POSClient({
         setLastTotalAmount(totalAmount);
         setShowSuccessModal(true);
         setCart([]);
-        setAppliedPromo(null);
-        setPromoCode("");
+        setRecalledOrderId(null);
         setAmountReceived("");
         setCheckoutStep('cart');
       } else {
