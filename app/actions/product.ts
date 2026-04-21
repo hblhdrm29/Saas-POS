@@ -35,8 +35,8 @@ export const createProduct = authAction(productSchema, async (data, ctx) => {
     revalidatePath("/admin/products");
     revalidatePath("/kasir");
     return newProduct;
-  } catch (error: any) {
-    if (error.code === "23505") {
+  } catch (error) {
+    if (error instanceof Error && (error as any).code === "23505") {
       throw new Error("SKU ini sudah digunakan oleh produk lain");
     }
     throw error;
@@ -63,8 +63,8 @@ export const updateProduct = authAction(productSchema, async (data, ctx) => {
     revalidatePath("/admin/products");
     revalidatePath("/kasir");
     return updated;
-  } catch (error: any) {
-    if (error.code === "23505") {
+  } catch (error) {
+    if (error instanceof Error && (error as any).code === "23505") {
       throw new Error("SKU ini sudah digunakan oleh produk lain");
     }
     throw error;
@@ -86,10 +86,10 @@ export const deleteProduct = authAction(z.object({ id: z.number() }), async (dat
   return { success: true };
 });
 
-export const uploadImage = authAction(z.any(), async (formData: FormData, ctx) => {
+export const uploadImage = authAction(z.instanceof(FormData), async (data, ctx) => {
   if (ctx.role !== "ADMIN") throw new Error("Forbidden");
 
-  const file = formData.get("image") as File;
+  const file = data.get("image") as File;
   if (!file) return null;
 
   const bytes = await file.arrayBuffer();

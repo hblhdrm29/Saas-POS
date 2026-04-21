@@ -25,14 +25,14 @@ async function migrate() {
     // Add foreign key constraint (wrapped in try-catch in case it exists)
     try {
         await sql`ALTER TABLE "promotions" ADD CONSTRAINT "promotions_complimentary_product_id_products_id_fk" FOREIGN KEY ("complimentary_product_id") REFERENCES "public"."products"("id") ON DELETE set null ON UPDATE no action`;
-    } catch (e) {
+    } catch {
         console.log('Note: Constraint might already exist, skipping...');
     }
 
     // Add unique index (wrapped in try-catch in case it exists)
     try {
         await sql`CREATE UNIQUE INDEX IF NOT EXISTS "sku_tenant_unique_idx" ON "products" ("tenant_id", "sku")`;
-    } catch (e) {
+    } catch {
         console.log('Note: Index might already exist, skipping...');
     }
 

@@ -6,7 +6,7 @@ import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 
-export async function authenticate(prevState: any, formData: FormData) {
+export async function authenticate(prevState: unknown, formData: FormData) {
   const email = formData.get("email") as string;
   let redirectTo = "/kasir";
 
@@ -19,15 +19,19 @@ export async function authenticate(prevState: any, formData: FormData) {
   } catch (error) {
      console.error("Auth action: DB check failed", error);
   }
-
   try {
     await signIn("credentials", {
       ...Object.fromEntries(formData),
-      redirect: false, // Handle redirect manually to avoid issues in some environments
+      redirect: false,
     });
-  } catch (error: any) {
-    if (error.type === "CredentialsSignin" || error.message?.includes("CredentialsSignin")) {
-      return { error: "InvalidCredentials" };
+  } catch (err) {
+    if (err instanceof Error) {
+      if (err.message.includes("NEXT_REDIRECT")) {
+        throw err; // Re-throw redirect errors so Next.js handles them
+      }
+      if (err.name === "CredentialsSignin" || err.message?.includes("CredentialsSignin")) {
+        return { error: "InvalidCredentials" };
+      }
     }
     return { error: "Something went wrong" };
   }

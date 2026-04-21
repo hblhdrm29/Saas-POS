@@ -16,7 +16,7 @@ type Transaction = {
     staffRole: string | null;
 };
 
-export default function TransactionList({ initialData }: { initialData: Transaction[] }) {
+export default function TransactionList({ initialData, currentDate }: { initialData: Transaction[], currentDate: string }) {
     const [transactions, setTransactions] = useState<Transaction[]>(initialData);
     const [activeTab, setActiveTab] = useState("ALL");
     const [search, setSearch] = useState("");
@@ -25,7 +25,7 @@ export default function TransactionList({ initialData }: { initialData: Transact
 
     const filterData = async () => {
         setIsLoading(true);
-        const res = await getTransactions({ paymentMethod: activeTab, search });
+        const res = await getTransactions({ paymentMethod: activeTab, search, date: currentDate });
         if (res.success) {
             setTransactions(res.data);
         }
@@ -35,7 +35,7 @@ export default function TransactionList({ initialData }: { initialData: Transact
     useEffect(() => {
         const timeoutId = setTimeout(filterData, 300);
         return () => clearTimeout(timeoutId);
-    }, [activeTab, search]);
+    }, [activeTab, search, currentDate]);
 
     // Supabase Realtime Subscription
     useEffect(() => {
@@ -130,7 +130,7 @@ export default function TransactionList({ initialData }: { initialData: Transact
                             {transactions.map((trx, index) => (
                                 <tr key={trx.id} className="hover:bg-slate-50/20 transition-all group">
                                     <td className="pl-6 py-4 text-center">
-                                        <span className="text-[11px] font-bold text-slate-400 tabular-nums">#{trx.id.toString().padStart(2, '0')}</span>
+                                        <span className="text-[11px] font-bold text-slate-400 tabular-nums">#{(transactions.length - index).toString().padStart(2, '0')}</span>
                                     </td>
                                     <td className="px-4 py-4 text-center">
                                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${

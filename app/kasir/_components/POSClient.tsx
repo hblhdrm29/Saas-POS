@@ -70,6 +70,7 @@ export default function POSClient({
   // Advanced POS State
   const [activeShift, setActiveShift] = useState<any>(null);
   const [showShiftModal, setShowShiftModal] = useState(false);
+  const [startingCashInput, setStartingCashInput] = useState("");
 
   const [parkedOrdersList, setParkedOrdersList] = useState<any[]>([]);
   const [showRecallModal, setShowRecallModal] = useState(false);
@@ -89,7 +90,7 @@ export default function POSClient({
     // Check for active shift
     const checkShift = async () => {
       const shift = await getActiveShift({});
-      if (shift.success && shift.data) {
+      if (shift && 'data' in shift && shift.data) {
         setActiveShift(shift.data);
       } else {
         setShowShiftModal(true);
@@ -166,22 +167,28 @@ export default function POSClient({
   const tax = (subtotal - discountAmount) * 0.04;
   const totalAmount = subtotal - discountAmount + tax;
 
-  const handleOpenShift = async () => {
-    const res = await openShift({ startingCash: 0 });
-    if (res.success && res.data.success) {
-      setActiveShift({ id: res.data.shiftId });
-      setShowShiftModal(false);
-    } else {
-      alert("Error: " + (res.success ? "Failed to open shift" : res.error));
-    }
+  const formatInputNumber = (val: string) => {
+    const cleanValue = val.replace(/\D/g, "");
+    if (cleanValue === "") return "";
+    return cleanValue.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   };
 
-
+  const handleOpenShift = async () => {
+    const cashValue = Number(startingCashInput.replace(/\./g, ""));
+    const res = await openShift({ startingCash: cashValue });
+    if (res && 'data' in res && res.data?.success) {
+      setActiveShift({ id: res.data.shiftId, startingCash: cashValue });
+      setShowShiftModal(false);
+    } else {
+      const errorMessage = (res as any)?.serverError || (res as any)?.validationErrors?._errors?.[0] || (res as any)?.error || "Gagal membuka shift. Silakan coba lagi.";
+      alert("Error: " + errorMessage);
+    }
+  };
 
   const handleParkOrder = async () => {
     if (cart.length === 0 || isProcessing) return;
     const customerName = prompt("Nama Pelanggan (opsional):");
-    
+
     setIsProcessing(true);
     const res = await parkOrder({
       items: cart.map(item => ({
@@ -198,7 +205,7 @@ export default function POSClient({
       setCart([]);
       setRecalledOrderId(null);
       localStorage.removeItem("pos_cart");
-// Refresh list
+      // Refresh list
       const parked = await getParkedOrders({});
       if (parked.success && parked.data) setParkedOrdersList(parked.data);
     } else {
@@ -247,7 +254,7 @@ export default function POSClient({
 
     setIsProcessing(true);
     const cleanAmountReceived = Number(amountReceived.toString().replace(/\./g, ""));
-    
+
     try {
       const result = await processCheckout({
         orderId: recalledOrderId,
@@ -374,8 +381,8 @@ export default function POSClient({
 
                 <div className="flex-1 flex items-center justify-center mb-4 relative overflow-hidden rounded-2xl bg-slate-50 border border-slate-100/50 group-hover:bg-blue-50 transition-colors">
                   {product.image ? (
-                    <img 
-                      src={product.image} 
+                    <img
+                      src={product.image}
                       alt={product.name}
                       className="absolute inset-0 w-full h-full object-cover"
                     />
@@ -761,17 +768,31 @@ export default function POSClient({
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[200] flex items-center justify-center p-6">
           <div className="bg-white w-full max-w-sm rounded-[2.5rem] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-500 border border-slate-100 flex flex-col">
             <div className="p-10 flex flex-col items-center">
-              <div className="w-20 h-20 bg-blue-50/50 rounded-[2rem] flex items-center justify-center mb-6 relative group">
-                <Clock className="w-10 h-10 text-blue-600 relative z-10" />
+              <div className="w-16 h-16 bg-blue-50/50 rounded-[2rem] flex items-center justify-center mb-6 relative group">
+                <Clock className="w-8 h-8 text-blue-600 relative z-10" />
               </div>
-              
-              <div className="text-center mb-10">
-                <h3 className="text-2xl font-bold text-slate-900 mb-2">Selamat Datang</h3>
-                <p className="text-sm font-medium text-slate-500 mb-6 px-4">Siap melayani pelanggan hari ini? Buka shift Anda untuk memulai transaksi.</p>
-                
-                <div className="inline-flex items-center gap-3 px-4 py-2 bg-slate-50 rounded-full border border-slate-100">
-                  <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-                  <p className="text-[11px] font-bold text-slate-600">{user?.name || "Kasir"}</p>
+
+              <div className="text-center mb-8">
+                <h3 className="text-2xl font-bold text-slate-900 mb-2">Buka Shift</h3>
+
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-full border border-slate-100 mb-6">
+                  <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                  <p className="text-[10px] font-bold text-slate-600">{user?.name || "Kasir"}</p>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 px-4 bg-slate-50 border border-slate-200 rounded-2xl focus-within:bg-white focus-within:border-blue-600 focus-within:ring-4 focus-within:ring-blue-50 transition-all">
+                    <span className="text-slate-400 font-bold text-sm shrink-0">Rp</span>
+                    <input
+                      type="text"
+                      placeholder="0"
+                      value={startingCashInput}
+                      onChange={(e) => setStartingCashInput(formatInputNumber(e.target.value))}
+                      className="w-full py-4 bg-transparent outline-none text-lg font-black text-slate-900 tabular-nums placeholder:text-slate-200"
+                      autoFocus
+                    />
+                  </div>
+                  <p className="text-[10px] text-slate-400 font-bold mt-2 italic">Modal awal (Uang receh di laci)</p>
                 </div>
               </div>
 
@@ -783,11 +804,11 @@ export default function POSClient({
                 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
-            
+
             <div className="bg-slate-50 px-10 py-5 border-t border-slate-100 text-center">
-               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                 {new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' })}
-               </p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                {new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' })}
+              </p>
             </div>
           </div>
         </div>

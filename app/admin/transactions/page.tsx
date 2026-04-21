@@ -1,8 +1,14 @@
 import { getTransactions } from "@/app/actions/transaction";
 import TransactionList from "./_components/TransactionList";
+import DateFilter from "./_components/DateFilter";
 
-export default async function TransactionsPage() {
-    const res = await getTransactions({ paymentMethod: "ALL" });
+export default async function TransactionsPage(props: {
+    searchParams: Promise<{ date?: string }>
+}) {
+    const searchParams = await props.searchParams;
+    const dateStr = searchParams.date || new Date().toISOString().split('T')[0];
+    
+    const res = await getTransactions({ paymentMethod: "ALL", date: dateStr });
     const transactions = res.success ? res.data : [];
 
     // Simple aggregate stats for the header
@@ -16,9 +22,12 @@ export default async function TransactionsPage() {
     return (
         <div className="space-y-6 max-w-[1400px]">
             {/* Dashboard Header with Gray Subtext */}
-            <div>
-                <h1 className="text-xl font-bold text-slate-900 tracking-tight">Transactions</h1>
-                <p className="text-slate-400 text-[11px] font-medium leading-none mt-1">Pantau transaksi bisnis Anda secara real-time</p>
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div>
+                    <h1 className="text-xl font-bold text-slate-900 tracking-tight">Transactions</h1>
+                    <p className="text-slate-400 text-[11px] font-medium leading-none mt-1">Pantau transaksi bisnis Anda secara real-time</p>
+                </div>
+                <DateFilter currentDate={dateStr} />
             </div>
 
             {/* Polos Stats Grid */}
@@ -43,7 +52,7 @@ export default async function TransactionsPage() {
             </div>
 
             {/* Minimalist Transaction List */}
-            <TransactionList initialData={transactions || []} />
+            <TransactionList initialData={transactions || []} currentDate={dateStr} />
 
             {/* Gray Subtext Footer */}
             <div className="pt-12 pb-20 border-t border-slate-50">

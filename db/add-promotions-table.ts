@@ -38,7 +38,7 @@ async function main() {
         ON DELETE cascade 
         ON UPDATE no action;
       `);
-    } catch (e) {
+    } catch {
       console.log("Note: Foreign key might already exist, skipping constraint creation.");
     }
 

@@ -5,17 +5,33 @@ import {
   X, 
   Loader2, 
   Save, 
-  Upload, 
   ImageIcon, 
-  Trash2, 
   AlertCircle, 
   Package 
 } from "lucide-react";
+import Image from "next/image";
 import { createProduct, updateProduct, uploadImage, getNextSku } from "@/app/actions/product";
 
+interface Product {
+  id?: number;
+  name: string;
+  sku: string;
+  price: string | number;
+  stock: number;
+  categoryId: number | null;
+  lowStockThreshold: number;
+  isActive: boolean;
+  image?: string | null;
+}
+
+interface Category {
+  id: number;
+  name: string;
+}
+
 interface ProductFormProps {
-  product?: any;
-  categories: any[];
+  product?: Product;
+  categories: Category[];
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -97,8 +113,9 @@ export default function ProductForm({ product, categories, onClose, onSuccess }:
       } else {
         setError(res.error || "Something went wrong");
       }
-    } catch (err: any) {
-      setError(err.message || "An error occurred");
+    } catch (err) {
+      const error = err as Error;
+      setError(error.message || "An error occurred");
     } finally {
       setLoading(false);
     }
@@ -141,6 +158,7 @@ export default function ProductForm({ product, categories, onClose, onSuccess }:
                 <div className="relative group">
                     <div className="w-16 h-16 rounded-xl bg-white border border-slate-200 flex items-center justify-center overflow-hidden shadow-sm">
                         {imagePreview ? (
+                            /* eslint-disable-next-line @next/next/no-img-element */
                             <img src={imagePreview} className="w-full h-full object-cover" alt="Preview" />
                         ) : (
                             <ImageIcon className="w-5 h-5 text-slate-200" />

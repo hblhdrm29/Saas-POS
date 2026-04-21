@@ -5,6 +5,13 @@ export type ActionState<T> =
   | { success: true; data: T }
   | { success: false; error: string };
 
+interface SessionUser {
+  id?: string;
+  sub?: string;
+  tenantId?: string;
+  role?: string;
+}
+
 export function authAction<TInput, TOutput>(
   schema: z.ZodType<TInput>,
   handler: (input: TInput, ctx: { userId: string; tenantId: string; role: string }) => Promise<TOutput>
@@ -17,13 +24,13 @@ export function authAction<TInput, TOutput>(
       }
 
       // Extract our custom JWT session properties
-      const user = session.user as any;
+      const user = session.user as SessionUser;
       const tenantId = user.tenantId;
-      const role = user.role;
+      const role = user.role || 'CASHIER';
       const userId = user.id || user.sub;
 
-      if (!tenantId) {
-        return { success: false, error: "No tenant context found" };
+      if (!tenantId || !userId) {
+        return { success: false, error: "Missing user session context" };
       }
 
       const parsed = schema.safeParse(input);
@@ -33,9 +40,10 @@ export function authAction<TInput, TOutput>(
 
       const result = await handler(parsed.data, { userId, tenantId, role });
       return { success: true, data: result };
-    } catch (err: any) {
+    } catch (err) {
       console.error("Action error:", err);
-      return { success: false, error: err.message || "Internal server error" };
+      const error = err as Error;
+      return { success: false, error: error.message || "Internal server error" };
     }
   };
 }

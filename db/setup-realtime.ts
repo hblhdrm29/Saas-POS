@@ -22,11 +22,12 @@ async function main() {
     `);
 
     console.log("✅ Realtime enabled for transactions!");
-  } catch (error: any) {
-    if (error.message?.includes("already exists in publication")) {
+  } catch (error) {
+    const err = error as Error;
+    if (err.message?.includes("already exists in publication")) {
       console.log("ℹ️ Table 'transactions' is already in the Realtime publication.");
     } else {
-      console.error("❌ Failed to enable Realtime:", error);
+      console.error("❌ Failed to enable Realtime:", err);
     }
   } finally {
     process.exit(0);

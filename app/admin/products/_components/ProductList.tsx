@@ -6,23 +6,37 @@ import {
   Search,
   Pencil,
   Trash2,
-  MoreVertical,
-  AlertCircle,
-  Package,
-  Filter
+  Package
 } from "lucide-react";
 import ProductForm from "./ProductForm";
 import { deleteProduct } from "@/app/actions/product";
 
+interface Product {
+  id: number;
+  name: string;
+  sku: string;
+  price: string | number;
+  stock: number;
+  categoryId: number | null;
+  lowStockThreshold: number;
+  isActive: boolean;
+  image?: string | null;
+}
+
+interface Category {
+  id: number;
+  name: string;
+}
+
 interface ProductListProps {
-  initialProducts: any[];
-  categories: any[];
+  initialProducts: Product[];
+  categories: Category[];
 }
 
 export default function ProductList({ initialProducts, categories }: ProductListProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [showForm, setShowForm] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [editingProduct, setEditingProduct] = useState<Product | undefined>(undefined);
   const [isDeleting, setIsDeleting] = useState<number | null>(null);
 
   const filteredProducts = useMemo(() => {
@@ -39,8 +53,9 @@ export default function ProductList({ initialProducts, categories }: ProductList
     try {
       const res = await deleteProduct({ id });
       if (!res.success) alert(res.error);
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err) {
+      const error = err as Error;
+      alert(error.message);
     } finally {
       setIsDeleting(null);
     }
@@ -68,7 +83,7 @@ export default function ProductList({ initialProducts, categories }: ProductList
 
         <div className="flex gap-2 w-full md:w-auto relative z-50">
           <button
-            onClick={() => { setEditingProduct(null); setShowForm(true); }}
+            onClick={() => { setEditingProduct(undefined); setShowForm(true); }}
             className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-[#0066FF] text-white rounded-xl text-[13px] font-bold shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition-all active:scale-95 tracking-tight cursor-pointer"
           >
             <Plus className="w-4 h-4" />
@@ -101,6 +116,7 @@ export default function ProductList({ initialProducts, categories }: ProductList
                     <div className="flex items-center gap-4">
                       <div className="w-11 h-11 rounded-xl bg-slate-50 border border-slate-200/60 flex items-center justify-center relative overflow-hidden shadow-sm">
                         {product.image ? (
+                           /* eslint-disable-next-line @next/next/no-img-element */
                            <img 
                               src={product.image} 
                               alt={product.name}
@@ -189,8 +205,8 @@ export default function ProductList({ initialProducts, categories }: ProductList
           <ProductForm
             product={editingProduct}
             categories={categories}
-            onClose={() => { setShowForm(false); setEditingProduct(null); }}
-            onSuccess={() => { setShowForm(false); setEditingProduct(null); }}
+            onClose={() => { setShowForm(false); setEditingProduct(undefined); }}
+            onSuccess={() => { setShowForm(false); setEditingProduct(undefined); }}
           />
         </div>
       )}

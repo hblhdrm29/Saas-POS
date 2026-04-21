@@ -4,7 +4,7 @@ import { z } from "zod";
 import { authAction } from "@/lib/safe-action";
 import { db } from "@/db";
 import { transactions, transactionItems, products, shifts, stockLogs, voidLogs, users, parkedOrders } from "@/db/schema";
-import { eq, and, sql, desc } from "drizzle-orm";
+import { eq, and, sql, desc, gte, lte } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 const checkoutSchema = z.object({
@@ -205,8 +205,21 @@ export const getTransactions = authAction(
     z.object({
         paymentMethod: z.string().optional(),
         search: z.string().optional(),
+        date: z.string().optional(),
     }),
     async (data, ctx) => {
+        let dateFilter = undefined;
+
+        if (data.date) {
+            const [year, month, day] = data.date.split('-').map(Number);
+            const startOfDay = new Date(year, month - 1, day, 0, 0, 0, 0);
+            const endOfDay = new Date(year, month - 1, day, 23, 59, 59, 999);
+            dateFilter = and(
+                gte(transactions.createdAt, startOfDay),
+                lte(transactions.createdAt, endOfDay)
+            );
+        }
+
         const query = db
             .select({
                 id: transactions.id,
@@ -222,6 +235,7 @@ export const getTransactions = authAction(
             .where(
                 and(
                     eq(transactions.tenantId, ctx.tenantId),
+                    dateFilter,
                     data.paymentMethod && data.paymentMethod !== "ALL" 
                         ? eq(transactions.paymentMethod, data.paymentMethod) 
                         : undefined,

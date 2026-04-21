@@ -13,11 +13,11 @@ const navItems = [
   { href: "/admin/shifts", icon: History, label: "Laporan Shift" },
 ];
 
-export default function SidebarNav() {
+export default function SidebarNav({ isExpanded = true }: { isExpanded?: boolean }) {
   const pathname = usePathname();
 
   return (
-    <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto">
+    <nav className={`flex-1 space-y-1 overflow-y-auto custom-scrollbar flex flex-col py-4 w-full ${!isExpanded ? "items-center" : ""}`}>
       {navItems.map((item) => {
         // Dynamic check for active state
         const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
@@ -26,10 +26,21 @@ export default function SidebarNav() {
           <Link
             key={item.href}
             href={item.href}
-            className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all ${isActive ? 'bg-blue-50 text-[#0066FF] font-bold' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 font-medium'}`}
+            title={!isExpanded ? item.label : ""}
+            className={`
+              flex items-center transition-all duration-300
+              ${isExpanded ? "gap-3 px-4 py-2.5 w-full" : "justify-center w-full h-12"}
+              ${isActive ? 'bg-blue-50 text-[#0066FF] shadow-[inset_0_0_0_1px_rgba(0,102,255,0.1)]' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}
+            `}
           >
-            <item.icon className={`w-[18px] h-[18px] ${isActive ? 'text-[#0066FF]' : 'text-slate-400'}`} />
-            <span className="text-[13px] tracking-tight">{item.label}</span>
+            <div className={`flex items-center justify-center shrink-0 transition-colors duration-300 ${isExpanded ? "w-5 h-5" : "w-10 h-10"} ${isActive ? 'text-[#0066FF]' : 'text-slate-400'}`}>
+              <item.icon className={`${isExpanded ? "w-[18px] h-[18px]" : "w-[20px] h-[20px]"}`} />
+            </div>
+            {isExpanded && (
+              <span className={`text-[13px] tracking-tight whitespace-nowrap animate-in fade-in slide-in-from-left-2 duration-300 ${isActive ? 'font-bold' : 'font-medium'}`}>
+                {item.label}
+              </span>
+            )}
           </Link>
         )
       })}

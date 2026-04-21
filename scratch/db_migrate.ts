@@ -1,6 +1,5 @@
 import postgres from 'postgres';
 import dotenv from 'dotenv';
-import path from 'path';
 
 dotenv.config();
 
@@ -16,11 +15,12 @@ async function migrate() {
         await sql`ALTER TABLE "shifts" ALTER COLUMN "starting_cash" DROP NOT NULL;`;
         await sql`ALTER TABLE "products" ADD COLUMN "image" text;`;
         console.log('Migration successful!');
-    } catch (error: any) {
-        if (error.message.includes('already exists')) {
+    } catch (error) {
+        const err = error as Error;
+        if (err.message.includes('already exists')) {
             console.log('Column "image" already exists, skipping...');
         } else {
-            console.error('Migration failed:', error);
+            console.error('Migration failed:', err);
         }
     } finally {
         await sql.end();

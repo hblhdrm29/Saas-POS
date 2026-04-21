@@ -26,21 +26,21 @@ async function seed() {
 
     // 2. Create Users
     console.log("➡️ Seeding Users...");
-    const [adminUser] = await db.insert(schema.users).values({
+    await db.insert(schema.users).values({
       tenantId: tenant.id,
       name: "Budi Admin",
       email: "admin@tokoutama.com",
       passwordHash: "rahasia123", // Real app would use bcrypt here
       role: "ADMIN"
-    }).returning();
+    });
 
-    const [cashierUser] = await db.insert(schema.users).values({
+    await db.insert(schema.users).values({
       tenantId: tenant.id,
       name: "Siti Kasir",
       email: "kasir@tokoutama.com",
       passwordHash: "rahasia123",
       role: "CASHIER"
-    }).returning();
+    });
     console.log("✅ Users Created (admin@tokoutama.com & kasir@tokoutama.com)");
 
     // 3. Create Categories

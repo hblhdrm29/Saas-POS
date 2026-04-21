@@ -1,12 +1,9 @@
-import { auth } from "@/auth";
-import { Download, Calendar, CreditCard, ShoppingCart, TrendingUp, AlertTriangle, PlusCircle } from "lucide-react";
-import Link from "next/link";
+import { Download, Calendar, CreditCard, ShoppingCart, TrendingUp, AlertTriangle } from "lucide-react";
 import SalesBarChart from "./_components/SalesBarChart";
 import RecentSales from "./_components/RecentSales";
 import { getDashboardStats, getWeeklySalesData, getRecentSales, getLowStockAlerts } from "@/app/actions/dashboard";
 
 export default async function AdminDashboard() {
-   const session = await auth();
    
    // Fetch live data
    const stats = await getDashboardStats();
@@ -21,6 +18,11 @@ export default async function AdminDashboard() {
          minimumFractionDigits: 0,
       }).format(val || 0);
    };
+
+   // Prepare date string for the range display
+   const startDateStr = new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+   const endDateStr = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+   const dateRangeLabel = `${startDateStr} - ${endDateStr}`;
 
    return (
       <div className="space-y-8 pb-20">
@@ -102,7 +104,7 @@ export default async function AdminDashboard() {
                   <div className="flex items-center gap-1.5 px-2 py-1 bg-slate-50/50 rounded-lg border border-slate-100">
                      <Calendar className="w-3 h-3 text-slate-400" />
                      <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">
-                        {new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })} - {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        {dateRangeLabel}
                      </span>
                   </div>
                </div>

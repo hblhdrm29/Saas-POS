@@ -67,9 +67,9 @@ export async function getWeeklySalesData() {
     .groupBy(sql`to_char(${transactions.createdAt}, 'DY')`);
 
   const dayOrder = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
-  
+
   // Create a map for easy lookup
-  const salesMap = results.reduce((acc: any, curr) => {
+  const salesMap = results.reduce((acc: Record<string, number>, curr) => {
     acc[curr.day.trim().toUpperCase()] = parseFloat(curr.sales || "0");
     return acc;
   }, {});
