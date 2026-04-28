@@ -149,10 +149,7 @@ export default function Home() {
 
                   {/* Left Column: Text Content */}
                   <div className="max-w-lg lg:pl-10">
-                     <div className="inline-flex items-center gap-3 px-3 py-1.5 bg-blue-50/50 border border-blue-100/50 rounded-full mb-6 text-center">
-                        <span className="flex h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse"></span>
-                        <span className="text-[9px] font-bold text-[#0B47A9] tracking-wider">Tentang Blueiy</span>
-                     </div>
+                     <span className="text-[10px] font-bold text-[#0B47A9] tracking-widest mb-4 block uppercase">Tentang Blueiy</span>
 
                      <p className="text-[11px] md:text-xs text-slate-400 mb-6 leading-relaxed border-l border-slate-200 pl-4 max-w-md">
                         Ekosistem manajemen bisnis cerdas yang menyatukan operasional kasir, inventaris, dan pesanan pelanggan dalam satu platform terpadu.
