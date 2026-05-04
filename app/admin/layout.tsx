@@ -1,14 +1,11 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import Link from "next/link";
-import { LayoutDashboard, Package, Receipt, LogOut, Ticket, Users, History, Warehouse, Settings, Search, Plus } from "lucide-react";
 import { signOut } from "@/auth";
-import Image from "next/image";
-import SidebarNav from "./_components/SidebarNav";
+import AdminShell from "./_components/AdminShell";
 
 import logoBlueiy from "../assets/logo/blueiy_premium.png";
 
-import AdminShell from "./_components/AdminShell";
+
 
 export default async function AdminLayout({
   children,
@@ -22,7 +19,7 @@ export default async function AdminLayout({
   }
 
   // Cast because session.user extended
-  const user = session.user as any;
+  const user = session.user;
 
   if (user.role !== "ADMIN") {
     // If Cashier tries to access Admin
@@ -36,7 +33,7 @@ export default async function AdminLayout({
 
   return (
     <AdminShell 
-      user={{ name: user.name, image: user.image }} 
+      user={{ name: user.name ?? "User", image: user.image ?? undefined }} 
       logo={logoBlueiy}
       signOutAction={signOutAction}
     >

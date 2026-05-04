@@ -45,7 +45,7 @@ export default function TransactionDetail({
         return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(parseFloat(val));
     };
 
-    const totalCalculated = items.reduce((acc: number, item: any) => acc + parseFloat(item.subtotal), 0);
+    const totalCalculated = items.reduce((acc: number, item: Item) => acc + parseFloat(item.subtotal), 0);
 
     const handleDelete = async () => {
         setIsDeleting(true);

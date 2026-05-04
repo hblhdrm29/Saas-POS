@@ -9,7 +9,6 @@ import {
   AlertCircle, 
   Package 
 } from "lucide-react";
-import Image from "next/image";
 import { createProduct, updateProduct, uploadImage, getNextSku } from "@/app/actions/product";
 
 interface Product {

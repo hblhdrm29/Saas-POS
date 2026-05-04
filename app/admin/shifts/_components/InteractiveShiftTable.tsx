@@ -10,10 +10,23 @@ import {
 } from "lucide-react";
 import ShiftDetailModal from "./ShiftDetailModal";
 
-export default function InteractiveShiftTable({ shiftList }: { shiftList: any[] }) {
+interface Shift {
+  id: number;
+  userName: string | null;
+  userRole: string | null;
+  startTime: Date | string;
+  endTime: Date | string | null;
+  startingCash: string | number | null;
+  totalSalesCash: string | number;
+  actualCash: string | number | null;
+  status: string;
+  notes?: string | null;
+}
+
+export default function InteractiveShiftTable({ shiftList }: { shiftList: Shift[] }) {
   const [selectedShiftId, setSelectedShiftId] = useState<number | null>(null);
 
-  const formatCurrency = (val: any) => {
+  const formatCurrency = (val: string | number | null) => {
     return new Intl.NumberFormat('id-ID', { 
       style: 'currency', 
       currency: 'IDR', 

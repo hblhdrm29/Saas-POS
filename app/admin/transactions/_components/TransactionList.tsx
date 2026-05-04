@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Search, ChevronDown, MoreHorizontal } from "lucide-react";
 import { getTransactions } from "@/app/actions/transaction";
 import TransactionDetail from "@/app/admin/transactions/_components/TransactionDetail";
@@ -23,19 +23,19 @@ export default function TransactionList({ initialData, currentDate }: { initialD
     const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    const filterData = async () => {
+    const filterData = React.useCallback(async () => {
         setIsLoading(true);
         const res = await getTransactions({ paymentMethod: activeTab, search, date: currentDate });
         if (res.success) {
             setTransactions(res.data);
         }
         setIsLoading(false);
-    };
+    }, [activeTab, search, currentDate]);
 
     useEffect(() => {
         const timeoutId = setTimeout(filterData, 300);
         return () => clearTimeout(timeoutId);
-    }, [activeTab, search, currentDate]);
+    }, [filterData]);
 
     // Supabase Realtime Subscription
     useEffect(() => {
@@ -58,7 +58,7 @@ export default function TransactionList({ initialData, currentDate }: { initialD
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [activeTab, search]); 
+    }, [filterData]); 
     // Dependency on search/activeTab so it doesn't stay out of sync if filters change, 
     // although filterData handles it.
 

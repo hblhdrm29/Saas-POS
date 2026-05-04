@@ -5,12 +5,7 @@ import { eq, desc, and, gte, lte } from "drizzle-orm";
 import React from "react";
 import DateFilter from "./_components/DateFilter";
 import InteractiveShiftTable from "./_components/InteractiveShiftTable";
-import {
-    History,
-    AlertTriangle,
-    Wallet,
-    CheckCircle2
-} from "lucide-react";
+import { History } from "lucide-react";
 
 export const dynamic = 'force-dynamic';
 
@@ -19,7 +14,8 @@ export default async function ShiftsPage(props: {
 }) {
     const searchParams = await props.searchParams;
     const session = await auth();
-    const user = session?.user as any;
+    if (!session?.user?.tenantId) return <div>Unauthorized</div>;
+    const tenantId = session.user.tenantId;
 
     const dateStr = searchParams.date || new Date().toISOString().split('T')[0];
 
@@ -44,13 +40,13 @@ export default async function ShiftsPage(props: {
         .from(shifts)
         .leftJoin(users, eq(shifts.userId, users.id))
         .where(and(
-            eq(shifts.tenantId, user.tenantId),
+            eq(shifts.tenantId, tenantId),
             gte(shifts.startTime, startOfDay),
             lte(shifts.startTime, endOfDay)
         ))
         .orderBy(desc(shifts.startTime));
 
-    const formatCurrency = (val: any) => {
+    const formatCurrency = (val: string | number) => {
         return new Intl.NumberFormat('id-ID', {
             style: 'currency',
             currency: 'IDR',

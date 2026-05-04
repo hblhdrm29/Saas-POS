@@ -4,7 +4,7 @@ import { z } from "zod";
 import { authAction } from "@/lib/safe-action";
 import { db } from "@/db";
 import { shifts, transactions, users } from "@/db/schema";
-import { eq, and, isNull, desc } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 const openShiftSchema = z.object({
@@ -111,7 +111,7 @@ const updateShiftAdminSchema = z.object({
 });
 
 export const updateShiftAdmin = authAction(updateShiftAdminSchema, async (data, ctx) => {
-  const updateData: any = {};
+  const updateData: Partial<typeof shifts.$inferInsert> = {};
   if (data.startingCash !== undefined) updateData.startingCash = data.startingCash.toString();
   if (data.actualCash !== undefined) updateData.actualCash = data.actualCash.toString();
   if (data.notes !== undefined) updateData.notes = data.notes;

@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { db } from "@/db";
 import { products, categories } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import POSClient from "./_components/POSClient";
 
@@ -12,24 +12,28 @@ export default async function POSPage() {
     redirect("/login");
   }
 
-  const user = session.user as any;
+  if (!session?.user?.tenantId) return redirect("/login");
+  const user = session.user as {
+    id: string;
+    name: string | null;
+    email: string;
+    role: string;
+    tenantId: string;
+  };
   const tenantId = user.tenantId;
 
   // Fetch categories for filtering
   const allCategories = await db
     .select()
     .from(categories)
-    .where(eq(categories.tenantId, tenantId));
+    .where(sql`${categories.tenantId} = ${tenantId}`);
 
   // Fetch active products
   const allProducts = await db
     .select()
     .from(products)
     .where(
-      and(
-        eq(products.tenantId, tenantId),
-        eq(products.isActive, true)
-      )
+      sql`${products.tenantId} = ${tenantId} AND ${products.isActive} = true`
     );
 
   // Normalize decimal/string fields from DB for the client

@@ -36,7 +36,7 @@ export const createProduct = authAction(productSchema, async (data, ctx) => {
     revalidatePath("/kasir");
     return newProduct;
   } catch (error) {
-    if (error instanceof Error && (error as any).code === "23505") {
+    if (error instanceof Error && (error as { code?: string }).code === "23505") {
       throw new Error("SKU ini sudah digunakan oleh produk lain");
     }
     throw error;
@@ -64,7 +64,7 @@ export const updateProduct = authAction(productSchema, async (data, ctx) => {
     revalidatePath("/kasir");
     return updated;
   } catch (error) {
-    if (error instanceof Error && (error as any).code === "23505") {
+    if (error instanceof Error && (error as { code?: string }).code === "23505") {
       throw new Error("SKU ini sudah digunakan oleh produk lain");
     }
     throw error;

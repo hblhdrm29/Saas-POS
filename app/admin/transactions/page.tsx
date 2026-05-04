@@ -12,7 +12,7 @@ export default async function TransactionsPage(props: {
     const transactions = res.success ? res.data : [];
 
     // Simple aggregate stats for the header
-    const totalVolume = transactions.reduce((acc: number, curr: any) => acc + parseFloat(curr.totalAmount), 0);
+    const totalVolume = transactions.reduce((acc: number, curr: { totalAmount: string | number }) => acc + parseFloat(curr.totalAmount.toString()), 0);
     const avgOrder = transactions.length > 0 ? totalVolume / transactions.length : 0;
 
     const formatCurrency = (val: number) => {
@@ -47,7 +47,7 @@ export default async function TransactionsPage(props: {
                 <div className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm transition-all hover:shadow-md">
                     <p className="text-[11px] font-bold text-slate-400 tracking-tight mb-2">Average Ticket</p>
                     <h3 className="text-lg font-black text-slate-900 leading-none mb-2">{formatCurrency(avgOrder)}</h3>
-                    <p className="text-[10px] font-semibold text-slate-400">Based on today's statistics</p>
+                    <p className="text-[10px] font-semibold text-slate-400">Based on today&apos;s statistics</p>
                 </div>
             </div>
 

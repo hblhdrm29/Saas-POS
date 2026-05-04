@@ -1,29 +1,29 @@
 import { auth } from "@/auth";
 import { db } from "@/db";
 import { products, categories } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { desc, sql } from "drizzle-orm";
 import ProductList from "./_components/ProductList";
 import { redirect } from "next/navigation";
 
 export default async function ProductsPage() {
   const session = await auth();
-  const user = session?.user as any;
-
-  if (!user || user.role !== "ADMIN") {
+  if (!session?.user?.tenantId || session.user.role !== "ADMIN") {
     redirect("/login");
   }
+
+  const user = session.user;
 
   // Fetch products and categories for this tenant
   const tenantProducts = await db
     .select()
     .from(products)
-    .where(eq(products.tenantId, user.tenantId))
+    .where(sql`${products.tenantId} = ${user.tenantId}`)
     .orderBy(desc(products.createdAt));
 
   const tenantCategories = await db
     .select()
     .from(categories)
-    .where(eq(categories.tenantId, user.tenantId));
+    .where(sql`${categories.tenantId} = ${user.tenantId}`);
 
   return (
     <div className="space-y-8">

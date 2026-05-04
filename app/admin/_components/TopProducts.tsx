@@ -1,4 +1,4 @@
-import { ShoppingBag, TrendingUp } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 
 const popularMenu = [
   { name: 'Kopi Susu Aren', price: 'Rp 22.000', sold: '2.340', income: 'Rp 51.480.000', trend: '+12%' },

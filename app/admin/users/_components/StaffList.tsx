@@ -3,7 +3,7 @@
 import { useState } from "react";
 import StaffForm from "./StaffForm";
 import { deleteStaff } from "@/app/actions/staff";
-import { Mail, Shield, Calendar, MoreVertical, BadgeCheck, Search, Users, UserPlus, Trash2, AlertCircle, Loader2, Edit3 } from "lucide-react";
+import { Shield, BadgeCheck, Search, UserPlus, Trash2, AlertCircle, Loader2, Edit3 } from "lucide-react";
 
 interface User {
     id: string;
@@ -48,8 +48,8 @@ export default function StaffList({ initialStaff }: { initialStaff: User[] }) {
             } else {
                 setDeleteError(res.error || "Gagal menghapus kasir.");
             }
-        } catch (err: any) {
-            setDeleteError(err.message || "Terjadi kesalahan sistem.");
+        } catch (err) {
+            setDeleteError(err instanceof Error ? err.message : "Terjadi kesalahan sistem.");
         } finally {
             setIsDeleting(false);
         }
@@ -72,7 +72,7 @@ export default function StaffList({ initialStaff }: { initialStaff: User[] }) {
                     ].map((tab) => (
                         <button
                             key={tab.id}
-                            onClick={() => setActiveTab(tab.id as any)}
+                            onClick={() => setActiveTab(tab.id as 'ADMIN' | 'CASHIER')}
                             className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-[11px] font-bold transition-all ${activeTab === tab.id ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                         >
                             <span>{tab.label}</span>

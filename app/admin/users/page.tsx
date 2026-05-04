@@ -1,13 +1,13 @@
 import { db } from "@/db";
 import { users, shifts } from "@/db/schema";
 import { auth } from "@/auth";
-import { eq, desc, and } from "drizzle-orm";
-import { UserPlus } from "lucide-react";
+import { eq, desc } from "drizzle-orm";
 import StaffList from "./_components/StaffList";
 
 export default async function UsersPage() {
     const session = await auth();
-    const currentUser = session?.user as any;
+    if (!session?.user?.tenantId) return <div>Unauthorized</div>;
+    const tenantId = session.user.tenantId;
 
     const staffList = await db
         .select({
@@ -33,7 +33,7 @@ export default async function UsersPage() {
               .orderBy(desc(shifts.startTime))
               .limit(1)
         ))
-        .where(eq(users.tenantId, currentUser.tenantId))
+        .where(eq(users.tenantId, tenantId))
         .orderBy(desc(users.createdAt));
 
     const serializedStaff = staffList.map(s => ({
@@ -52,7 +52,7 @@ export default async function UsersPage() {
                 </div>
             </div>
 
-            <StaffList initialStaff={serializedStaff as any} />
+            <StaffList initialStaff={serializedStaff} />
         </div>
     );
 }

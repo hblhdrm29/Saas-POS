@@ -10,17 +10,14 @@ import {
   CheckCircle2,
   X,
   CreditCard,
-  Wallet,
   Banknote,
   QrCode,
   Printer,
   ChevronRight,
   Clock,
-  History,
-  LayoutList
 } from "lucide-react";
 import { processCheckout } from "@/app/actions/transaction";
-import { openShift, getActiveShift, closeShift } from "@/app/actions/shift";
+import { openShift, getActiveShift } from "@/app/actions/shift";
 import { parkOrder, getParkedOrders, recallParkedOrder, deleteParkedOrder } from "@/app/actions/parked-order";
 
 import logoBlueiy from "../../assets/logo/blueiy_premium.png";
@@ -52,7 +49,13 @@ export default function POSClient({
 }: {
   initialProducts: Product[],
   initialCategories: Category[],
-  user: any
+  user: {
+    id: string;
+    name: string | null;
+    email: string;
+    role: string;
+    tenantId: string;
+  }
 }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
@@ -68,11 +71,16 @@ export default function POSClient({
   const [amountReceived, setAmountReceived] = useState<string>("");
 
   // Advanced POS State
-  const [activeShift, setActiveShift] = useState<any>(null);
+  const [activeShift, setActiveShift] = useState<{ 
+    id: number; 
+    startingCash: number | string | null; 
+    totalSalesCash: number | string;
+    status: string;
+  } | null>(null);
   const [showShiftModal, setShowShiftModal] = useState(false);
   const [startingCashInput, setStartingCashInput] = useState("");
 
-  const [parkedOrdersList, setParkedOrdersList] = useState<any[]>([]);
+  const [parkedOrdersList, setParkedOrdersList] = useState<{ id: number; customerName: string | null; totalAmount: string | number; createdAt: string | Date }[]>([]);
   const [showRecallModal, setShowRecallModal] = useState(false);
   const [recalledOrderId, setRecalledOrderId] = useState<number | null>(null);
 
@@ -176,11 +184,17 @@ export default function POSClient({
   const handleOpenShift = async () => {
     const cashValue = Number(startingCashInput.replace(/\./g, ""));
     const res = await openShift({ startingCash: cashValue });
-    if (res && 'data' in res && res.data?.success) {
-      setActiveShift({ id: res.data.shiftId, startingCash: cashValue });
+    if (res && 'data' in res && res.data) {
+      const data = res.data as { shiftId: number };
+      setActiveShift({ 
+        id: data.shiftId, 
+        startingCash: cashValue, 
+        totalSalesCash: 0,
+        status: "OPEN" 
+      });
       setShowShiftModal(false);
     } else {
-      const errorMessage = (res as any)?.serverError || (res as any)?.validationErrors?._errors?.[0] || (res as any)?.error || "Gagal membuka shift. Silakan coba lagi.";
+      const errorMessage = (res as { serverError?: string })?.serverError || (res as { validationErrors?: { _errors?: string[] } })?.validationErrors?._errors?.[0] || (res as { error?: string })?.error || "Gagal membuka shift. Silakan coba lagi.";
       alert("Error: " + errorMessage);
     }
   };
@@ -216,7 +230,7 @@ export default function POSClient({
   const handleRecallOrder = async (id: number) => {
     const res = await recallParkedOrder({ parkedOrderId: id });
     if (res.success && res.data) {
-      const recalledItems = res.data.items.map((item: any) => {
+      const recalledItems = res.data.items.map((item: { productId: number; quantity: number; unitPrice: string | number }) => {
         const product = cleanedProducts.find(p => p.id === item.productId);
         if (!product) return null;
         return {
@@ -253,7 +267,6 @@ export default function POSClient({
     if (cart.length === 0 || isProcessing || !activeShift) return;
 
     setIsProcessing(true);
-    const cleanAmountReceived = Number(amountReceived.toString().replace(/\./g, ""));
 
     try {
       const result = await processCheckout({
@@ -381,10 +394,11 @@ export default function POSClient({
 
                 <div className="flex-1 flex items-center justify-center mb-4 relative overflow-hidden rounded-2xl bg-slate-50 border border-slate-100/50 group-hover:bg-blue-50 transition-colors">
                   {product.image ? (
-                    <img
+                    <Image
                       src={product.image}
                       alt={product.name}
-                      className="absolute inset-0 w-full h-full object-cover"
+                      fill
+                      className="object-cover"
                     />
                   ) : (
                     <ShoppingCart className="w-8 h-8 text-slate-200 opacity-20 group-hover:text-blue-400 group-hover:opacity-40 transition-all" />
@@ -684,7 +698,7 @@ export default function POSClient({
                     </div>
                     <h4 className="text-xs font-bold text-slate-900 mt-4 mb-1">Pindai QRIS</h4>
                     <p className="text-[10px] text-slate-400 leading-relaxed">
-                      Pastikan pelanggan sudah mendapatkan konfirmasi "Berhasil" di aplikasinya.
+                      Pastikan pelanggan sudah mendapatkan konfirmasi &quot;Berhasil&quot; di aplikasinya.
                     </p>
                   </div>
                 </div>
@@ -846,7 +860,7 @@ export default function POSClient({
                     <div className="space-y-1">
                       <p className="text-sm font-bold text-slate-800">{order.customerName || "Tanpa Nama"}</p>
                       <div className="flex items-center gap-2 text-[11px] text-slate-400">
-                        <span className="font-medium">{new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        <span className="font-medium">{new Date(order.createdAt || new Date()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                         <span className="w-1 h-1 bg-slate-300 rounded-full" />
                         <span className="font-mono">#{order.id}</span>
                       </div>

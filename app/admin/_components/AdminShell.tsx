@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import Image, { StaticImageData } from "next/image";
 import { usePathname } from "next/navigation";
-import { PanelLeft, Menu, X, LogOut, Loader2 } from "lucide-react";
+import { PanelLeft, Menu, X, LogOut } from "lucide-react";
 import SidebarNav from "./SidebarNav";
 
 interface AdminShellProps {
@@ -13,7 +13,7 @@ interface AdminShellProps {
     name: string;
     image?: string;
   };
-  logo: any;
+  logo: string | StaticImageData;
   signOutAction: () => Promise<void>;
 }
 
@@ -38,7 +38,10 @@ export default function AdminShell({ children, user, logo, signOutAction }: Admi
 
   // Close sidebar on navigation (mobile only)
   useEffect(() => {
-    if (isMobile) setIsOpen(false);
+    if (isMobile && isOpen) {
+      setIsOpen(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, isMobile]);
 
   return (
@@ -121,11 +124,13 @@ export default function AdminShell({ children, user, logo, signOutAction }: Admi
                   <p className="text-[13px] font-bold text-slate-900 leading-none">{user.name}</p>
                   <p className="text-[10px] font-semibold text-slate-400 mt-1">Administrator</p>
                </div>
-               <div className="w-8 h-8 bg-slate-200 rounded-full border border-slate-300 overflow-hidden shadow-sm">
-                  <img 
+               <div className="w-8 h-8 bg-slate-200 rounded-full border border-slate-300 overflow-hidden shadow-sm relative">
+                  <Image 
                     src={`https://ui-avatars.com/api/?name=${user.name}&background=0066FF&color=fff`} 
                     alt="User" 
-                    className="w-full h-full object-cover" 
+                    fill
+                    className="object-cover" 
+                    unoptimized
                   />
                </div>
             </div>

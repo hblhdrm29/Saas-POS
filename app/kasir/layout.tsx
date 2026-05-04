@@ -1,13 +1,9 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import { LogOut, Home, Settings } from "lucide-react";
-import { signOut } from "@/auth";
+import { Home, Settings } from "lucide-react";
 import { getActiveShift } from "@/app/actions/shift";
 import Link from "next/link";
-import Image from "next/image";
 import LogoutButton from "./_components/LogoutButton";
-
-import logoBlueiy from "../assets/logo/blueiy_premium.png";
 
 export default async function POSLayout({
   children,

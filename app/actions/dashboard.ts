@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { transactions, transactionItems, products } from "@/db/schema";
+import { transactions, products } from "@/db/schema";
 import { eq, sql, desc, and, gte } from "drizzle-orm";
 import { auth } from "@/auth";
 
@@ -126,10 +126,7 @@ export async function getLowStockAlerts() {
     .select()
     .from(products)
     .where(
-      and(
-        eq(products.tenantId, tenantId),
-        sql`${products.stock} <= ${products.lowStockThreshold}`
-      )
+      sql`${products.tenantId} = ${tenantId} AND ${products.stock} <= ${products.lowStockThreshold}`
     )
     .limit(3);
 

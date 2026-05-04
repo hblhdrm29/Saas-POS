@@ -5,9 +5,7 @@ import PromotionsClient from "./_components/PromotionsClient";
 
 export default async function PromotionsPage() {
   const session = await auth();
-  const user = session?.user as any;
-
-  if (!user || user.role !== "ADMIN") {
+  if (!session?.user?.tenantId || session.user.role !== "ADMIN") {
     redirect("/login");
   }
 
@@ -16,7 +14,7 @@ export default async function PromotionsPage() {
 
   return (
     <div className="space-y-8">
-      <PromotionsClient initialData={initialVouchers as any} />
+      <PromotionsClient initialData={initialVouchers} />
     </div>
   );
 }

@@ -4,20 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
-   BadgeDollarSign,
    LayoutDashboard,
-   Zap,
-   ShieldCheck,
    Box,
    ArrowRight,
-   ChevronRight,
-   TrendingUp,
-   Users,
    Smartphone,
    ChevronDown,
-   Play,
    CheckCircle2,
-   Activity
 } from "lucide-react";
 
 import logoBlueiy from "./assets/logo/blueiy_premium.png";
@@ -172,11 +164,13 @@ export default function Home() {
                      <div className="absolute inset-x-4 inset-y-0 bg-yellow-400 rounded-[2.5rem] w-[85%] h-full ml-auto -z-10 shadow-xl shadow-yellow-500/10"></div>
 
                      {/* AI Generated Barista Image */}
-                     <div className="relative z-10 p-4 w-full max-w-md">
-                        <img
+                     <div className="relative z-10 p-4 w-full max-w-md aspect-square">
+                        <Image
                            src="/hero_barista.png"
                            alt="Cafe owner holding POS tablet"
-                           className="w-full h-auto object-cover rounded-2xl shadow-lg border-[3px] border-white"
+                           fill
+                           className="object-cover rounded-2xl shadow-lg border-[3px] border-white"
+                           priority
                         />
                      </div>
                   </div>
@@ -245,11 +239,12 @@ export default function Home() {
 
                      {/* Right Image */}
                      <div className="w-full md:w-1/2 relative overflow-hidden bg-slate-50">
-                        <img
+                        <Image
                            key={activeTab.id}
                            src={`/industries/${activeTab.img}`}
                            alt={activeTab.title}
-                           className="absolute inset-0 w-full h-full object-cover transition-all duration-1000 animate-in fade-in zoom-in-95"
+                           fill
+                           className="object-cover transition-all duration-1000 animate-in fade-in zoom-in-95"
                         />
                      </div>
                   </div>
@@ -477,24 +472,24 @@ export default function Home() {
 
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-4 max-w-3xl mx-auto">
                      {/* DANA */}
-                     <div className="bg-white rounded-2xl h-16 flex items-center justify-center p-4 shadow-xl hover:scale-105 transition-transform overflow-hidden">
-                        <img src="/payments/dana.png" alt="DANA" className="h-full w-full object-contain" />
+                     <div className="bg-white rounded-2xl h-16 flex items-center justify-center p-4 shadow-xl hover:scale-105 transition-transform overflow-hidden relative">
+                        <Image src="/payments/dana.png" alt="DANA" fill className="object-contain p-2" />
                      </div>
                      {/* MANDIRI */}
                      <div className="bg-white rounded-2xl h-16 flex items-center justify-center p-4 shadow-xl hover:scale-105 transition-transform overflow-hidden font-bold text-[#003D79] text-sm tracking-tighter">
                         mandiri<span className="text-yellow-500 italic ml-0.5">/</span>
                      </div>
                      {/* BRI */}
-                     <div className="bg-white rounded-2xl h-16 flex items-center justify-center p-4 shadow-xl hover:scale-105 transition-transform overflow-hidden">
-                        <img src="/payments/bri.png" alt="BRI" className="h-full w-full object-contain" />
+                     <div className="bg-white rounded-2xl h-16 flex items-center justify-center p-4 shadow-xl hover:scale-105 transition-transform overflow-hidden relative">
+                        <Image src="/payments/bri.png" alt="BRI" fill className="object-contain p-2" />
                      </div>
                      {/* BCA */}
-                     <div className="bg-white rounded-2xl h-16 flex items-center justify-center p-4 shadow-xl hover:scale-105 transition-transform overflow-hidden">
-                        <img src="/payments/bca.png" alt="BCA" className="h-full w-full object-contain" />
+                     <div className="bg-white rounded-2xl h-16 flex items-center justify-center p-4 shadow-xl hover:scale-105 transition-transform overflow-hidden relative">
+                        <Image src="/payments/bca.png" alt="BCA" fill className="object-contain p-2" />
                      </div>
                      {/* QRIS */}
-                     <div className="bg-white rounded-2xl h-16 flex items-center justify-center p-4 shadow-xl hover:scale-105 transition-transform overflow-hidden">
-                        <img src="/payments/qris.png" alt="QRIS" className="h-full w-full object-contain p-1" />
+                     <div className="bg-white rounded-2xl h-16 flex items-center justify-center p-4 shadow-xl hover:scale-105 transition-transform overflow-hidden relative">
+                        <Image src="/payments/qris.png" alt="QRIS" fill className="object-contain p-2" />
                      </div>
                   </div>
                </div>

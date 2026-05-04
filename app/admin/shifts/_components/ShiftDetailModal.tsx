@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { X, Clock, Wallet, History, AlertTriangle, CheckCircle2, User, Power, Loader2 } from "lucide-react";
+import { X, Clock, History, AlertTriangle, CheckCircle2, Power, Loader2 } from "lucide-react";
 import { getShiftDetails, closeShiftByAdmin } from "@/app/actions/shift";
 
 interface ShiftDetailModalProps {
@@ -9,30 +9,50 @@ interface ShiftDetailModalProps {
   onClose: () => void;
 }
 
+interface TransactionLog {
+  id: number;
+  paymentMethod: string;
+  totalAmount: string | number;
+  createdAt: string | Date;
+}
+
+interface ShiftDetailData {
+  id: number;
+  userName: string | null;
+  startingCash: string | number | null;
+  totalSalesCash: string | number;
+  actualCash: string | number | null;
+  status: "OPEN" | "CLOSED";
+  endTime: string | Date | null;
+  notes: string | null;
+  transactions: TransactionLog[];
+}
+
 export default function ShiftDetailModal({ shiftId, onClose }: ShiftDetailModalProps) {
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<ShiftDetailData | null>(null);
   const [closing, setClosing] = useState(false);
 
-  useEffect(() => {
-    if (shiftId) {
-      fetchDetails();
-    }
-  }, [shiftId]);
-
-  async function fetchDetails() {
+  const fetchDetails = React.useCallback(async () => {
+    if (!shiftId) return;
     setLoading(true);
     try {
-      const res = await getShiftDetails(shiftId!);
+      const res = await getShiftDetails(shiftId);
       if (res.success) {
-        setData(res.data);
+        setData(res.data as unknown as ShiftDetailData);
       }
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
     }
-  }
+  }, [shiftId]);
+
+  useEffect(() => {
+    if (shiftId) {
+      fetchDetails();
+    }
+  }, [shiftId, fetchDetails]);
 
   async function handleForceClose() {
     if (!confirm("Apakah Anda yakin ingin menutup shift ini secara paksa?")) return;
@@ -45,14 +65,14 @@ export default function ShiftDetailModal({ shiftId, onClose }: ShiftDetailModalP
       } else {
         alert(res.error || "Gagal menutup shift");
       }
-    } catch (err) {
+    } catch {
       alert("Terjadi kesalahan sistem");
     } finally {
       setClosing(false);
     }
   }
 
-  const formatCurrency = (val: any) => {
+  const formatCurrency = (val: string | number) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(Number(val));
   };
 
@@ -98,7 +118,7 @@ export default function ShiftDetailModal({ shiftId, onClose }: ShiftDetailModalP
                     <div className="space-y-4">
                       <div className="flex justify-between items-end">
                         <p className="text-[10px] font-bold text-slate-400">Modal Awal</p>
-                        <p className="text-sm font-bold text-slate-900">{formatCurrency(data.startingCash)}</p>
+                        <p className="text-sm font-bold text-slate-900">{formatCurrency(data.startingCash || 0)}</p>
                       </div>
                       <div className="flex justify-between items-end">
                         <p className="text-[10px] font-bold text-slate-400">Total Penjualan</p>
@@ -117,7 +137,7 @@ export default function ShiftDetailModal({ shiftId, onClose }: ShiftDetailModalP
                           <>
                             <div className="flex justify-between items-end mb-1">
                               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Uang Aktual</p>
-                              <p className="text-lg font-black text-slate-900">{formatCurrency(data.actualCash)}</p>
+                              <p className="text-lg font-black text-slate-900">{formatCurrency(data.actualCash || 0)}</p>
                             </div>
                             
                             <div className="pt-2 mt-2 border-t border-dashed border-slate-200 flex justify-between items-center">
@@ -168,7 +188,7 @@ export default function ShiftDetailModal({ shiftId, onClose }: ShiftDetailModalP
                         <CheckCircle2 className="w-8 h-8 text-emerald-500" />
                         <div>
                           <p className="text-emerald-700 font-bold text-[13px]">Audit Selesai</p>
-                          <p className="text-emerald-600/70 text-[10px] font-medium mt-1 truncate">{new Date(data.endTime).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
+                          <p className="text-emerald-600/70 text-[10px] font-medium mt-1 truncate">{new Date(data.endTime || new Date()).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
                         </div>
                       </>
                     )}
@@ -184,7 +204,7 @@ export default function ShiftDetailModal({ shiftId, onClose }: ShiftDetailModalP
                     
                     <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                       {data.transactions?.length > 0 ? (
-                        data.transactions.map((tx: any, idx: number) => (
+                        data.transactions.map((tx: TransactionLog, idx: number) => (
                           <div key={tx.id} className="group bg-white border border-slate-100 p-3.5 rounded-2xl flex items-center justify-between hover:border-blue-200 transition-all">
                             <div className="flex items-center gap-4">
                               <div className="w-9 h-9 bg-slate-50 group-hover:bg-blue-50 rounded-xl flex items-center justify-center transition-colors">

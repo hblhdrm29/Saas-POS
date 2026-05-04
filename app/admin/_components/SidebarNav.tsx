@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Package, Receipt, Ticket, History, PlusCircle, Users } from "lucide-react";
+import { LayoutDashboard, Package, Receipt, Ticket, History, Users } from "lucide-react";
 
 const navItems = [
   { href: "/admin", icon: LayoutDashboard, label: "Dashboard" },

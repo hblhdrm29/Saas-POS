@@ -4,7 +4,7 @@ import { LogOut } from "lucide-react";
 import { useState } from "react";
 import ShiftLogoutModal from "./ShiftLogoutModal";
 
-export default function LogoutButton({ activeShift }: { activeShift: any }) {
+export default function LogoutButton({ activeShift }: { activeShift: { id: number; startingCash: string | number | null; totalSalesCash: string | number; status: string } | null }) {
     const [showModal, setShowModal] = useState(false);
 
     return (

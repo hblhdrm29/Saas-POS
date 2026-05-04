@@ -11,7 +11,7 @@ import { revalidatePath } from "next/cache";
  */
 export async function getPromotions() {
   const session = await auth();
-  const tenantId = (session?.user as any)?.tenantId;
+  const tenantId = session?.user?.tenantId;
 
   if (!tenantId) {
     throw new Error("Unauthorized: No tenant context");
@@ -40,9 +40,21 @@ export async function getPromotions() {
 /**
  * Creates a new promotion.
  */
-export async function createPromotion(data: any) {
+export interface CreatePromotionData {
+  name: string;
+  code: string;
+  type: "PERCENTAGE" | "FIXED";
+  value: number;
+  minOrder: number;
+  maxDiscount?: number;
+  quota: string;
+  expiry: string | Date;
+  active?: boolean;
+}
+
+export async function createPromotion(data: CreatePromotionData) {
   const session = await auth();
-  const tenantId = (session?.user as any)?.tenantId;
+  const tenantId = session?.user?.tenantId;
 
   if (!tenantId) {
     throw new Error("Unauthorized");
@@ -73,9 +85,9 @@ export async function createPromotion(data: any) {
 /**
  * Updates an existing promotion.
  */
-export async function updatePromotion(id: number, data: any) {
+export async function updatePromotion(id: number, data: CreatePromotionData) {
   const session = await auth();
-  const tenantId = (session?.user as any)?.tenantId;
+  const tenantId = session?.user?.tenantId;
 
   if (!tenantId) {
     throw new Error("Unauthorized");
@@ -111,7 +123,7 @@ export async function updatePromotion(id: number, data: any) {
  */
 export async function deletePromotion(id: number) {
   const session = await auth();
-  const tenantId = (session?.user as any)?.tenantId;
+  const tenantId = session?.user?.tenantId;
 
   if (!tenantId) {
     throw new Error("Unauthorized");
@@ -135,7 +147,7 @@ export async function deletePromotion(id: number) {
  */
 export async function togglePromotionStatus(id: number, currentStatus: boolean) {
   const session = await auth();
-  const tenantId = (session?.user as any)?.tenantId;
+  const tenantId = session?.user?.tenantId;
 
   if (!tenantId) {
     throw new Error("Unauthorized");

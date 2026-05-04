@@ -1,12 +1,13 @@
 import { db } from "@/db";
 import { stockLogs, products, users } from "@/db/schema";
 import { auth } from "@/auth";
-import { eq, desc, lt, gte, and, sql } from "drizzle-orm";
-import { Warehouse, ArrowUpRight, ArrowDownRight, RefreshCcw, Search, AlertTriangle, Package, History, User } from "lucide-react";
+import { eq, desc, and, sql } from "drizzle-orm";
+import { ArrowUpRight, ArrowDownRight, Search, AlertTriangle, Package, History } from "lucide-react";
 
 export default async function InventoryPage() {
     const session = await auth();
-    const user = session?.user as any;
+    if (!session?.user?.tenantId) return <div>Unauthorized</div>;
+    const tenantId = session.user.tenantId;
 
     // Fetch stock logs
     const logs = await db
@@ -24,7 +25,7 @@ export default async function InventoryPage() {
         .from(stockLogs)
         .leftJoin(products, eq(stockLogs.productId, products.id))
         .leftJoin(users, eq(stockLogs.userId, users.id))
-        .where(eq(stockLogs.tenantId, user.tenantId))
+        .where(eq(stockLogs.tenantId, tenantId))
         .orderBy(desc(stockLogs.createdAt))
         .limit(50);
 
@@ -34,7 +35,7 @@ export default async function InventoryPage() {
         .from(products)
         .where(
             and(
-                eq(products.tenantId, user.tenantId),
+                eq(products.tenantId, tenantId),
                 eq(products.isActive, true),
                 sql`${products.stock} <= ${products.lowStockThreshold}`
             )

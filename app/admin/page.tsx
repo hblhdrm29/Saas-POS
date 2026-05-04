@@ -20,8 +20,9 @@ export default async function AdminDashboard() {
    };
 
    // Prepare date string for the range display
-   const startDateStr = new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
-   const endDateStr = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+   const now = new Date();
+   const startDateStr = new Date(now.getTime() - 6 * 24 * 60 * 60 * 1000).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+   const endDateStr = now.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
    const dateRangeLabel = `${startDateStr} - ${endDateStr}`;
 
    return (

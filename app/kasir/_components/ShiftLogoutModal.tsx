@@ -5,8 +5,15 @@ import { X, LogOut, Receipt, ArrowRight, Loader2, Coins } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { closeShift } from "@/app/actions/shift";
 
+interface Shift {
+    id: number;
+    startingCash: string | number | null;
+    totalSalesCash: string | number;
+    status: string;
+}
+
 interface ShiftLogoutModalProps {
-    activeShift: any;
+    activeShift: Shift | null;
     onClose: () => void;
 }
 
@@ -16,7 +23,6 @@ export default function ShiftLogoutModal({ activeShift, onClose }: ShiftLogoutMo
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
     const [finalTotal, setFinalTotal] = useState(0);
-    const [actualCash, setActualCash] = useState("");
 
     const handleExitOnly = async () => {
         setLoading(true);
@@ -24,11 +30,12 @@ export default function ShiftLogoutModal({ activeShift, onClose }: ShiftLogoutMo
     };
 
     const handleCheckout = async () => {
+        if (!activeShift) return;
         setLoading(true);
         setError(null);
 
         try {
-            const amount = Math.round(Number(activeShift?.startingCash || 0) + Number(activeShift?.totalSalesCash || 0));
+            const amount = Math.round(Number(activeShift.startingCash || 0) + Number(activeShift.totalSalesCash || 0));
             setFinalTotal(amount);
 
             const res = await closeShift({
@@ -36,20 +43,20 @@ export default function ShiftLogoutModal({ activeShift, onClose }: ShiftLogoutMo
                 // actualCash omitted to trigger server-side automated calculation
             });
 
-            if (res && 'data' in res && res.data?.success) {
+            if (res && 'data' in res && (res.data as { success?: boolean })?.success) {
                 setSuccess(true);
                 // Wait 2 seconds then sign out
                 setTimeout(async () => {
                     await signOut({ callbackUrl: "/login" });
                 }, 2000);
             } else {
-                const errorMessage = (res as any)?.serverError || (res as any)?.validationErrors?._errors?.[0] || (res as any)?.error || "Gagal menutup shift. Silakan coba lagi.";
+                const errorMessage = (res as { serverError?: string })?.serverError || (res as { validationErrors?: { _errors?: string[] } })?.validationErrors?._errors?.[0] || (res as { error?: string })?.error || "Gagal menutup shift. Silakan coba lagi.";
                 setError(errorMessage);
                 setLoading(false);
             }
-        } catch (err: any) {
+        } catch (err) {
             console.error("Shift checkout error:", err);
-            setError(err.message || "Terjadi kesalahan sistem saat menutup shift.");
+            setError(err instanceof Error ? err.message : "Terjadi kesalahan sistem saat menutup shift.");
             setLoading(false);
         }
     };

@@ -2,16 +2,17 @@ import { db } from "@/db";
 import { tenants } from "@/db/schema";
 import { auth } from "@/auth";
 import { eq } from "drizzle-orm";
-import { Settings, Printer, Store, Save } from "lucide-react";
+import { Printer, Store, Save } from "lucide-react";
 
 export default async function SettingsPage() {
     const session = await auth();
-    const user = session?.user as any;
+    if (!session?.user?.tenantId) return <div>Unauthorized</div>;
+    const tenantId = session.user.tenantId;
 
     const [tenant] = await db
         .select()
         .from(tenants)
-        .where(eq(tenants.id, user.tenantId))
+        .where(eq(tenants.id, tenantId))
         .limit(1);
 
     return (

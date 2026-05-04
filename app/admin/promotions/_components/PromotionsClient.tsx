@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { 
   Plus, Search, Filter, Ticket, Edit2, Trash2, 
-  ToggleLeft, ToggleRight, X, Calendar, 
+  ToggleLeft, ToggleRight, X, 
   Loader2, AlertCircle
 } from "lucide-react";
 import { 
@@ -23,8 +23,8 @@ interface Promotion {
   maxDiscount: number | null;
   quota: number;
   used: number;
-  expiry: Date;
-  active: boolean;
+  expiry: Date | string | null;
+  active: boolean | null;
 }
 
 interface PromotionsClientProps {
@@ -47,10 +47,20 @@ export default function PromotionsClient({ initialData }: PromotionsClientProps)
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string;
+    code: string;
+    type: "PERCENTAGE" | "FIXED";
+    value: string;
+    minOrder: string;
+    maxDiscount: string;
+    quota: string;
+    expiry: string;
+    active: boolean;
+  }>({
     name: "",
     code: "",
-    type: "Persen",
+    type: "PERCENTAGE",
     value: "",
     minOrder: "0",
     maxDiscount: "",
@@ -59,14 +69,14 @@ export default function PromotionsClient({ initialData }: PromotionsClientProps)
     active: true
   });
 
-  const today = new Date();
+  const today = useMemo(() => new Date(), []);
 
-  const getStatus = (v: Promotion) => {
+  const getStatus = useCallback((v: Promotion) => {
     if (!v.active) return "Off";
-    if (new Date(v.expiry) < today) return "Kedaluwarsa";
+    if (v.expiry && new Date(v.expiry) < today) return "Kedaluwarsa";
     if (v.used >= v.quota) return "Habis";
     return "Aktif";
-  };
+  }, [today]);
 
   const filteredRows = useMemo(() => {
     return initialData.filter(v => {
@@ -77,11 +87,11 @@ export default function PromotionsClient({ initialData }: PromotionsClientProps)
       const matchesType = filterType === "Semua Tipe" || v.type === filterType;
       return matchesSearch && matchesStatus && matchesType;
     });
-  }, [search, filterStatus, filterType, initialData]);
+  }, [search, filterStatus, filterType, initialData, getStatus]);
 
   const stats = [
     { label: "Total Voucher", value: initialData.length, icon: Ticket, color: "text-blue-600" },
-    { label: "Voucher Aktif", value: initialData.filter(v => v.active && new Date(v.expiry) >= today).length, icon: Ticket, color: "text-emerald-600" },
+    { label: "Voucher Aktif", value: initialData.filter(v => v.active && v.expiry && new Date(v.expiry) >= today).length, icon: Ticket, color: "text-emerald-600" },
     { label: "Total Digunakan", value: initialData.reduce((acc, v) => acc + v.used, 0), icon: Ticket, color: "text-amber-600" },
     { label: "Rata-rata Konversi", value: `${initialData.length ? Math.round((initialData.reduce((acc, v) => acc + (v.used/v.quota), 0) / initialData.length) * 100) : 0}%`, icon: Ticket, color: "text-purple-600" },
   ];
@@ -94,7 +104,7 @@ export default function PromotionsClient({ initialData }: PromotionsClientProps)
     setFormData({
       name: "",
       code: "",
-      type: "Persen",
+      type: "PERCENTAGE",
       value: "10",
       minOrder: "0",
       maxDiscount: "50000",
@@ -110,13 +120,13 @@ export default function PromotionsClient({ initialData }: PromotionsClientProps)
     setFormData({
       name: v.name,
       code: v.code,
-      type: v.type,
+      type: v.type as "PERCENTAGE" | "FIXED",
       value: v.value.toString(),
       minOrder: v.minOrder.toString(),
       maxDiscount: v.maxDiscount?.toString() || "",
       quota: v.quota.toString(),
-      expiry: new Date(v.expiry).toISOString().split("T")[0],
-      active: v.active
+      expiry: new Date(v.expiry || new Date()).toISOString().split("T")[0],
+      active: !!v.active
     });
     setSelectedId(v.id);
     setModalType("edit");
@@ -133,10 +143,16 @@ export default function PromotionsClient({ initialData }: PromotionsClientProps)
     setError(null);
     try {
       let res;
+      const formattedData = {
+        ...formData,
+        value: Number(formData.value),
+        minOrder: Number(formData.minOrder),
+        maxDiscount: formData.maxDiscount ? Number(formData.maxDiscount) : undefined,
+      };
       if (modalType === "create") {
-        res = await createPromotion(formData);
+        res = await createPromotion(formattedData);
       } else if (modalType === "edit" && selectedId) {
-        res = await updatePromotion(selectedId, formData);
+        res = await updatePromotion(selectedId, formattedData);
       }
       
       if (res?.success) {
@@ -144,7 +160,7 @@ export default function PromotionsClient({ initialData }: PromotionsClientProps)
       } else {
         setError(res?.error || "Gagal menyimpan data.");
       }
-    } catch (err) {
+    } catch {
       setError("Terjadi kesalahan sistem.");
     } finally {
       setIsLoading(false);
@@ -157,7 +173,7 @@ export default function PromotionsClient({ initialData }: PromotionsClientProps)
     try {
       const res = await deletePromotion(selectedId);
       if (res.success) setModalType(null);
-    } catch (err) {
+    } catch {
       setError("Gagal menghapus.");
     } finally {
       setIsLoading(false);
@@ -280,7 +296,7 @@ export default function PromotionsClient({ initialData }: PromotionsClientProps)
             ) : filteredRows.map((v) => {
               const status = getStatus(v);
               const usagePercent = Math.min(100, Math.round((v.used / v.quota) * 100));
-              const isExpired = new Date(v.expiry) < today;
+              const isExpired = new Date(v.expiry || new Date()) < today;
 
               return (
                 <tr key={v.id} className="hover:bg-slate-50/50 transition-colors group">
@@ -327,7 +343,7 @@ export default function PromotionsClient({ initialData }: PromotionsClientProps)
                   </td>
                   <td className="px-4 py-3.5">
                     <span className={`text-[11px] font-bold ${isExpired ? 'text-rose-600' : 'text-slate-600'} tabular-nums`}>
-                      {new Date(v.expiry).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })}
+                      {new Date(v.expiry || new Date()).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })}
                     </span>
                   </td>
                   <td className="px-4 py-3.5 text-center">
@@ -344,7 +360,7 @@ export default function PromotionsClient({ initialData }: PromotionsClientProps)
                         <Edit2 className="w-3.5 h-3.5" />
                       </button>
                       <button 
-                        onClick={() => toggleActive(v.id, v.active)}
+                        onClick={() => toggleActive(v.id, !!v.active)}
                         className={`p-1.5 rounded-lg transition-all ${v.active ? 'text-amber-500 hover:bg-amber-50' : 'text-emerald-500 hover:bg-emerald-50'}`}
                       >
                         {v.active ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
@@ -419,12 +435,12 @@ export default function PromotionsClient({ initialData }: PromotionsClientProps)
                     <td className="py-1">
                       <select 
                         value={formData.type}
-                        onChange={(e) => setFormData({...formData, type: e.target.value})}
+                        onChange={(e) => setFormData({...formData, type: e.target.value as "PERCENTAGE" | "FIXED"})}
                         className="w-full px-3 py-2 bg-slate-50/50 border border-slate-100 rounded-lg outline-none focus:bg-white focus:border-slate-900 transition-all font-bold text-[12px] appearance-none cursor-pointer"
                         style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23ccc' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '0.8rem' }}
                       >
-                        <option>Persen</option>
-                        <option>Nominal</option>
+                        <option value="PERCENTAGE">Persen</option>
+                        <option value="FIXED">Nominal</option>
                       </select>
                     </td>
                   </tr>
@@ -432,14 +448,14 @@ export default function PromotionsClient({ initialData }: PromotionsClientProps)
                   {/* NILAI */}
                   <tr>
                     <td className="py-2.5 pr-2 text-[9px] font-black text-slate-300 tracking-widest">
-                      {formData.type === "Persen" ? "Nilai (%) *" : "Nilai (Rp) *"}
+                      {formData.type === "PERCENTAGE" ? "Nilai (%) *" : "Nilai (Rp) *"}
                     </td>
                     <td className="py-1">
                       <input 
                         type="number" 
                         value={formData.value}
                         onChange={(e) => setFormData({...formData, value: e.target.value})}
-                        placeholder={formData.type === "Persen" ? "20" : "10000"}
+                        placeholder={formData.type === "PERCENTAGE" ? "20" : "10000"}
                         className="w-full px-3 py-2 bg-slate-50/50 border border-slate-100 rounded-lg outline-none focus:bg-white focus:border-slate-900 transition-all font-bold text-[12px] placeholder:text-slate-200"
                       />
                     </td>

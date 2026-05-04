@@ -47,8 +47,8 @@ export const createStaff = authAction(staffSchema, async (data, ctx) => {
 
     revalidatePath("/admin/users");
     return { success: true };
-  } catch (error: any) {
-    throw new Error(error.message || "Failed to create staff member.");
+  } catch (error) {
+    throw new Error(error instanceof Error ? error.message : "Failed to create staff member.");
   }
 });
 
@@ -62,7 +62,7 @@ export const updateStaff = authAction(staffSchema, async (data, ctx) => {
   }
 
   try {
-    const updateData: any = {
+    const updateData: Partial<typeof users.$inferInsert> = {
       name: data.name,
       email: data.email,
       role: data.role,
@@ -85,8 +85,8 @@ export const updateStaff = authAction(staffSchema, async (data, ctx) => {
 
     revalidatePath("/admin/users");
     return { success: true };
-  } catch (error: any) {
-    throw new Error(error.message || "Failed to update staff member.");
+  } catch (error) {
+    throw new Error(error instanceof Error ? error.message : "Failed to update staff member.");
   }
 });
 
@@ -120,7 +120,7 @@ export const deleteStaff = authAction(z.object({ id: z.string() }), async (data,
 
         revalidatePath("/admin/users");
         return { success: true };
-    } catch (error: any) {
-        throw new Error(error.message || "Failed to delete staff member.");
+    } catch (error) {
+        throw new Error(error instanceof Error ? error.message : "Failed to delete staff member.");
     }
 });

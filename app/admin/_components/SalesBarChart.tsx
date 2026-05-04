@@ -82,6 +82,7 @@ export default function SalesBarChart({ data }: { data: SalesData[] }) {
                   fontSize: '11px',
                   fontWeight: '700'
                 }}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 formatter={(value: any) => [`Rp ${Number(value || 0).toLocaleString('id-ID')}`, 'Penjualan']}
               />
             )}

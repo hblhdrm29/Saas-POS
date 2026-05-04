@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { X, Loader2, UserPlus, Shield, BadgeCheck, Lock, Mail, User, Save } from "lucide-react";
+import { useState } from "react";
+import { X, Loader2, UserPlus, Shield, BadgeCheck, Save } from "lucide-react";
 import { createStaff, updateStaff } from "@/app/actions/staff";
 import { useRouter } from "next/navigation";
 
@@ -46,8 +46,8 @@ export default function StaffForm({ onClose, initialData }: StaffFormProps) {
             } else {
                 setError(res.error || `Gagal ${isEdit ? 'memperbarui' : 'menambahkan'}.`);
             }
-        } catch (err: any) {
-            setError(err.message || "Terjadi kesalahan sistem.");
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Terjadi kesalahan sistem.");
         } finally {
             setLoading(false);
         }
